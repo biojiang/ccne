@@ -4,7 +4,7 @@ Carbapenemase-encoding gene Copy Number Estimator (ccne) is a tool to estimate t
 # Usage
 
 Name:<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ccne 1.0.0 by Jianping Jiang <jiangjianping@fudan.edu.cn><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ccne 1.0.0 by Jianping Jiang<br/>
 Synopsis:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carbapenemase-encoding gene copy number estimator<br/>
 Usage:<br/>
@@ -28,3 +28,10 @@ Computation:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--flank&nbsp;[N]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;flanking&nbsp;length&nbsp;of&nbsp;sequence&nbsp;to&nbsp;be&nbsp;excluded&nbsp;(default&nbsp;'100')<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--cpus&nbsp;[N]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;CPUs&nbsp;to&nbsp;use&nbsp;(default&nbsp;'1')<br/>
 ***
+# Licence
+* GPL V3
+
+# Author
+* Jiang Jianping
+* Institute of Antibiotics, Huashan hospital, Fudan University
+* jiangjianping@fudan.edu.cn
