@@ -40,7 +40,7 @@ Used for fetching mapped reads and sorting them by locus</br>
 Used for getting bed files</br>
 *Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2.* [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
 # Licence
-* GPL V3
+* [GPL V3](https://github.com/biojiang/ccne/blob/main/LICENSE)
 
 # Author
 * Jiang Jianping
