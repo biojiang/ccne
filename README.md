@@ -29,6 +29,16 @@ Computation:
   --cpus [N]         Number of CPUs to use (default '1')
 
 ```
+# Dependencies
+* bwa</br>
+Used for reads mapping</br>
+Li H. and Durbin R. (2009) Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics, 25, 1754-1760.[PMID: [19451168](http://www.ncbi.nlm.nih.gov/pubmed/19451168)]
+* samtools</br>
+Used for fetching mapped reads and sorting them by locus</br>
+Li H., Handsaker B., Wysoker A., Fennell T., Ruan J., Homer N., Marth G., Abecasis G., Durbin R., and 1000 Genome Project Data Processing Subgroup, 2009, The Sequence alignment/map (SAM) format and SAMtools, Bioinformatics, 25(16) 2078-9 [PMID:[19505943](http://www.ncbi.nlm.nih.gov/pubmed/19505943)]
+* bedtools</br>
+Used for getting bed files</br>
+Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2. [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
 # Licence
 * GPL V3
 
