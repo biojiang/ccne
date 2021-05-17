@@ -14,7 +14,7 @@ General:
   --version          Print version and exit
   --quiet            No screen output (default OFF)
 Setup:
-  --dbdir [X]        CCNE database root folders (default '/data/project/MultiKPCCNV/ccne/data')
+  --dbdir [X]        CCNE database root folders (default '/ccne/data')
   --listdb           List all configured databases
   --listsp           List all configured species and housekeeping genes
 Input:
