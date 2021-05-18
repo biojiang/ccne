@@ -7,10 +7,10 @@ $ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
 All finished! Enjoy!
 
 $ ls
-File.list result.txt
+File.list result.txt SRR14561347_1.fastq.gz SRR14561347_2.fastq.gz
 
 $ head File.list
-SRR14561347	../SRR14561347_1.fastq.gz	../SRR14561347_2.fastq.gz
+SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 
 $ head result.txt
 ID	rpoB reads coverage	KPC-2 reads coverage	ratio
@@ -76,6 +76,30 @@ ID|The sample ID user provided in the input file
 rpoB reads coverage|The estimated reads coverage of the input reference housekeeping gene
 KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
 ratio|Divide the reads coverage of carbapenemase-encoding gene into that of housekeeping gene
+## Tutorial
+1. Fetch the reads files (SRR14561347) in fastq format from NCBI SRA database. (SRR14561347 generated from a *Klebsiella pneumoinae* clinical isolate with triple KPC-2 encoding genes on the plasmid)
+```
+$ fasterq-dump --split-3 SRR14561347
+```
+2. Copy input file templete from templete folder.
+```
+$ cp ./templete/templete.list File.list
+```
+3. Modify the input file.
+```
+$ head File.list
+SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
+```
+4. Run ccne.
+```
+$ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
+```
+5. Check the result.
+```
+$ head result.txt
+ID	rpoB reads coverage	KPC-2 reads coverage	ratio
+SRR14561347	767.177023498695	2398.69106881406	3.12664612643751
+```
 # Dependencies
 * **bwa**</br>
 Used for reads mapping</br>
