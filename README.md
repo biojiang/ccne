@@ -7,10 +7,10 @@ $ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
 All finished! Enjoy!
 
 $ ls
-File.list result.txt
+File.list result.txt SRR14561347_1.fastq.gz SRR14561347_2.fastq.gz
 
 $ head File.list
-SRR14561347	../SRR14561347_1.fastq.gz	../SRR14561347_2.fastq.gz
+SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 
 $ head result.txt
 ID	rpoB reads coverage	KPC-2 reads coverage	ratio
@@ -73,9 +73,33 @@ The ccne will output the result to the file with the name the user provided.
 Name|Description
 ---|:--
 ID|The sample ID user provided in the input file
-rpoB copy number|The estimated reads coverage of the input reference housekeeping gene
-KPC-2 copy number|The estimated reads coverage of the input carbapenemase-encoding gene
+rpoB reads coverage|The estimated reads coverage of the input reference housekeeping gene
+KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
 ratio|Divide the reads coverage of carbapenemase-encoding gene into that of housekeeping gene
+## Tutorial
+1. Fetch the reads files (SRR14561347) in fastq format from NCBI SRA database. (SRR14561347 generated from a *Klebsiella pneumoinae* clinical isolate with triple KPC-2 encoding genes on the plasmid)
+```
+$ fasterq-dump --split-3 SRR14561347
+```
+2. Copy input file templete from templete folder.
+```
+$ cp ./templete/templete.list File.list
+```
+3. Modify the input file.
+```
+$ head File.list
+SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
+```
+4. Run ccne.
+```
+$ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
+```
+5. Check the result.
+```
+$ head result.txt
+ID	rpoB reads coverage	KPC-2 reads coverage	ratio
+SRR14561347	767.177023498695	2398.69106881406	3.12664612643751
+```
 # Dependencies
 * **bwa**</br>
 Used for reads mapping</br>
@@ -86,8 +110,10 @@ Used for fetching mapped reads and sorting them by locus</br>
 * **bedtools**</br>
 Used for getting bed files</br>
 *Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2.* [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
+# Test environment
+Ubuntu 5.4.0 with perl v5.26.2 (Theoretically compatible with other generic Linux version but not tested)
 # Licence
-* [GPL V3](https://github.com/biojiang/ccne/blob/main/LICENSE)
+* ccne is free software, released under the [GPL V3](https://github.com/biojiang/ccne/blob/main/LICENSE)
 
 # Author
 * Jiang Jianping
