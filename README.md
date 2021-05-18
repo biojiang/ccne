@@ -1,6 +1,22 @@
 # ccne: Carbapenemase-encoding gene Copy Number Estimator
 # Introduction
 Carbapenemase-encoding gene Copy Number Estimator (ccne) is a tool to estimate the copy number of carbapenemase-encoding gene. It uses housekeeping gene as the reference and compares the count of reads that mapped to carbapenemase-encoding genes with the count of reads that mapped to the reference gene. 
+# Installation
+## Source
+Install the latest version direct from Github. 
+```
+cd $HOME
+git clone https://github.com/biojiang/ccne.git
+$HOME/ccne/ccne --help
+```
+## Check installation
+Check the ccne version:
+```
+ccne --version
+```
+Check dependencies:<br/>
+The ccne will check the dependencies automatically each time before running.
+
 # Usage
 ```
 Name:
