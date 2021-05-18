@@ -1,18 +1,35 @@
 # ccne: Carbapenemase-encoding gene Copy Number Estimator
 # Introduction
 Carbapenemase-encoding gene Copy Number Estimator (ccne) is a tool to estimate the copy number of carbapenemase-encoding gene. It uses housekeeping gene as the reference and compares the count of reads that mapped to carbapenemase-encoding genes with the count of reads that mapped to the reference gene. 
+# Quick start
+```
+$ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
+All finished! Enjoy!
+
+$ ls
+File.list result.txt
+
+$ head File.list
+SRR14561347	../SRR14561347_1.fastq.gz	../SRR14561347_2.fastq.gz
+
+$ head result.txt
+ID	rpoB copy number	KPC-2 copy number	ratio
+SRR14561347	767.177023498695	2398.69106881406	3.12664612643751
+```
 # Installation
 ## Source
 Install the latest version direct from Github. 
 ```
-cd $HOME
-git clone https://github.com/biojiang/ccne.git
-$HOME/ccne/ccne --help
+$ cd $HOME
+
+$ git clone https://github.com/biojiang/ccne.git
+
+$ $HOME/ccne/ccne --help
 ```
 ## Check installation
 Check the ccne version:
 ```
-ccne --version
+$ ccne --version
 ```
 Check dependencies:<br/>
 The ccne will check the dependencies automatically each time before running.
@@ -45,6 +62,11 @@ Computation:
   --cpus [N]         Number of CPUs to use (default '1')
 
 ```
+# Running
+## Input Requirements
+* Sequence read file(s) in FASTQ format (can be .gz compressed) format
+* Carbapenemase-encoding gene name
+* The reference single copy housekeeping gene name
 # Dependencies
 * **bwa**</br>
 Used for reads mapping</br>
