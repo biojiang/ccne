@@ -113,7 +113,7 @@ Used for getting bed files</br>
 # Test environment
 Ubuntu 5.4.0 with perl v5.26.2 (Theoretically compatible with other generic Linux version but not tested)
 # Licence
-* [GPL V3](https://github.com/biojiang/ccne/blob/main/LICENSE)
+* ccne is free software, released under the [GPL V3](https://github.com/biojiang/ccne/blob/main/LICENSE)
 
 # Author
 * Jiang Jianping
