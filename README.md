@@ -86,6 +86,8 @@ Used for fetching mapped reads and sorting them by locus</br>
 * **bedtools**</br>
 Used for getting bed files</br>
 *Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2.* [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
+# Test environment
+Ubuntu 5.4.0 with perl v5.26.2 (Theoretically compatible with other generic Linux version but not tested)
 # Licence
 * [GPL V3](https://github.com/biojiang/ccne/blob/main/LICENSE)
 
