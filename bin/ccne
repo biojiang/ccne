@@ -28,7 +28,6 @@ use FindBin;
 use Cwd qw(abs_path);
 
 
-
 # global variables
 my $OPSYS = $^O;
 my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
@@ -116,8 +115,8 @@ if(not defined $Housekeeping_gene)
 
 
 
-my $CARB_index = "../db/Carb/$CARB_Gene.fasta";
-my $Housekeeping_index = "../db/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
+my $CARB_index = "$dbdir/Carb/$CARB_Gene.fasta";
+my $Housekeeping_index = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
 if(not -e $CARB_index)
 {
 	&err("$CARB_Gene index file not found!");
@@ -128,7 +127,7 @@ if(not -e $Housekeeping_index)
 }
 open IN,"<$input";
 open OUT,">$output";
-print OUT "ID\t$Housekeeping_gene reads coverage\t$CARB_Gene reads coverage\tratio\n";
+print OUT "ID\t$Housekeeping_gene reads coverage\t$CARB_Gene reads coverage\tEstimated $CARB_Gene copy number(ratio)\n";
 while(my $line = <IN>)
 {
 	chomp $line;
@@ -174,7 +173,7 @@ while(my $line = <IN>)
 	my $hk_cn = &stat($content_hk,$fl);
 	my $carb_cn = &stat($content_carb,$fl);
 	my $ratio = $carb_cn/$hk_cn;
-	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\n";
+	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",int($ratio+0.5),"($ratio)\n";
 	&msg("All finished! Enjoy!");
 }
 
@@ -196,8 +195,6 @@ sub stat()
         map{$sum+=$_;$i++;}@stat[$fl-1..$#stat-$fl];
         return $sum/$i;
 }
-
-
 
 
 #------------------------------------------------
