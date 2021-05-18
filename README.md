@@ -13,7 +13,7 @@ $ head File.list
 SRR14561347	../SRR14561347_1.fastq.gz	../SRR14561347_2.fastq.gz
 
 $ head result.txt
-ID	rpoB copy number	KPC-2 copy number	ratio
+ID	rpoB reads coverage	KPC-2 reads coverage	ratio
 SRR14561347	767.177023498695	2398.69106881406	3.12664612643751
 ```
 # Installation
@@ -67,6 +67,15 @@ Computation:
 * Sequence read file(s) in FASTQ format (can be .gz compressed) format
 * Carbapenemase-encoding gene name
 * The reference single copy housekeeping gene name
+## Output File
+The ccne will output the result to the file with the name the user provided.
+## Columns in the output file
+Name|Description
+---|:--:
+ID|The sample ID user provided in the input file
+rpoB copy number|The estimated reads coverage of the input reference housekeeping gene
+KPC-2 copy number|The estimated reads coverage of the input carbapenemase-encoding gene
+ratio|Divide the reads coverage of carbapenemase-encoding gene into that of housekeeping gene
 # Dependencies
 * **bwa**</br>
 Used for reads mapping</br>
