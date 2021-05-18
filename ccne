@@ -126,7 +126,7 @@ if(not -e $Housekeeping_index)
 }
 open IN,"<$input";
 open OUT,">$output";
-print OUT "ID\t$Housekeeping_gene copy number\t$CARB_Gene copy number\tratio\n";
+print OUT "ID\t$Housekeeping_gene reads coverage\t$CARB_Gene reads coverage\tratio\n";
 while(my $line = <IN>)
 {
 	chomp $line;
