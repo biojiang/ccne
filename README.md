@@ -13,8 +13,8 @@ $ head File.list
 SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 
 $ head result.txt
-ID	rpoB reads coverage	KPC-2 reads coverage	ratio
-SRR14561347	767.177023498695	2398.69106881406	3.12664612643751
+ID	rpoB reads coverage	KPC-2 reads coverage	ratio Estimated KPC-2 copy number
+SRR14561347	767.177023498695	2398.69106881406	3.12664612643751  3
 ```
 # Installation
 ## Source
@@ -76,6 +76,7 @@ ID|The sample ID user provided in the input file
 rpoB reads coverage|The estimated reads coverage of the input reference housekeeping gene
 KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
 ratio|Divide the reads coverage of carbapenemase-encoding gene into that of housekeeping gene
+Estimated KPC-2 copy number|Rounding of ratio
 ## Tutorial
 1. Fetch the reads files (SRR14561347) in fastq format from NCBI SRA database. (SRR14561347 generated from a *Klebsiella pneumoinae* clinical isolate with triple KPC-2 encoding genes on the plasmid)
 ```
