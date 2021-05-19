@@ -98,8 +98,8 @@ $ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
 5. Check the result.
 ```
 $ head result.txt
-ID	rpoB reads coverage	KPC-2 reads coverage	ratio
-SRR14561347	767.177023498695	2398.69106881406	3.12664612643751
+ID	rpoB reads coverage	KPC-2 reads coverage	ratio Estimated KPC-2 copy number
+SRR14561347	767.177023498695	2398.69106881406	3.12664612643751  3
 ```
 # Dependencies
 * **bwa**</br>
