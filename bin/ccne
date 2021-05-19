@@ -127,7 +127,7 @@ if(not -e $Housekeeping_index)
 }
 open IN,"<$input";
 open OUT,">$output";
-print OUT "ID\t$Housekeeping_gene reads coverage\t$CARB_Gene reads coverage\tEstimated $CARB_Gene copy number(ratio)\n";
+print OUT "ID\t$Housekeeping_gene reads coverage\t$CARB_Gene reads coverage\tratio\tEstimated $CARB_Gene copy number\n";
 while(my $line = <IN>)
 {
 	chomp $line;
@@ -173,7 +173,7 @@ while(my $line = <IN>)
 	my $hk_cn = &stat($content_hk,$fl);
 	my $carb_cn = &stat($content_carb,$fl);
 	my $ratio = $carb_cn/$hk_cn;
-	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",int($ratio+0.5),"($ratio)\n";
+	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\t",int($ratio+0.5),"\n";
 	&msg("All finished! Enjoy!");
 }
 
