@@ -24,7 +24,7 @@ $ cd $HOME
 
 $ git clone https://github.com/biojiang/ccne.git
 
-$ $HOME/ccne/ccne --help
+$ $HOME/ccne/bin/ccne --help
 ```
 ## Check installation
 Check the ccne version:
