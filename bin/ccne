@@ -140,8 +140,8 @@ while(my $line = <IN>)
 		my $reads1 = $ele[1];
 		if(-e $reads1)
 		{
-			$cmd_carb = "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -dz ";
-			$cmd_hk = "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -dz";
+			$cmd_carb = "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
+			$cmd_hk = "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
 		}
 		else
 		{
@@ -154,8 +154,8 @@ while(my $line = <IN>)
 		my $reads2 =  $ele[2];
 		if(-e $reads1 and -e $reads2)
 		{
-			$cmd_carb = "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -dz ";
-			$cmd_hk = "bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -dz";
+			$cmd_carb = "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
+			$cmd_hk = "bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
 		}
 		else
 		{
