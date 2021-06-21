@@ -34,7 +34,7 @@ my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
 my $EXE = $FindBin::RealScript;
 my $VERSION = "1.0.0";
 my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
-my (@Options,@LOG,$quiet,$dbdir,$CARB_Gene, $SP, $Housekeeping_gene,$input,$output,$threads,$fl);
+my (@Options,@LOG,$quiet,$multiref,$dbdir,$CARB_Gene, $SP, $Housekeeping_gene,$input,$output,$threads,$fl);
 $dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
 
 &add_bundle_to_path();
@@ -113,35 +113,57 @@ if(not defined $Housekeeping_gene)
 	else{&err("--sp parameter error! Only Kp|Ab|Ec|Pa allowed!")}
 }
 
-
+my @Housekeeping_index_set = ();
+if($multiref == 1)
+{
+	@Housekeeping_index_set = glob "$dbdir/Housekeeping/$SP".'_*.fasta';
+}
+else
+{
+	@Housekeeping_index_set = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
+}
 
 my $CARB_index = "$dbdir/Carb/$CARB_Gene.fasta";
-my $Housekeeping_index = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
+#my $Housekeeping_index = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
 if(not -e $CARB_index)
 {
 	&err("$CARB_Gene index file not found!");
 }
-if(not -e $Housekeeping_index)
+for my $Housekeeping_index(@Housekeeping_index_set)
 {
-        &err("$SP $Housekeeping_gene index file not found!");
+	if(not -e $Housekeeping_index)
+	{
+        	&err("$Housekeeping_index index file not found!");
+	}
 }
 open IN,"<$input";
 open OUT,">$output";
-print OUT "ID\t$Housekeeping_gene reads coverage\t$CARB_Gene reads coverage\tratio\tEstimated $CARB_Gene copy number\n";
+if($multiref == 1)
+{
+	print OUT "ID\tAverage reference reads depth\t$CARB_Gene reads depth\tratio\tEstimated $CARB_Gene copy number\n";
+}
+else
+{
+	print OUT "ID\t$Housekeeping_gene reads depth\t$CARB_Gene reads depth\tratio\tEstimated $CARB_Gene copy number\n";
+}
 while(my $line = <IN>)
 {
 	chomp $line;
 	my @ele = split/\t/,$line;
-	my $cmd_carb = '';
-	my $cmd_hk = '';
+	my @cmd_carb = ();
+	my @cmd_hk = ();
 	my $name = $ele[0];
 	if($#ele == 1)
 	{
 		my $reads1 = $ele[1];
 		if(-e $reads1)
 		{
-			$cmd_carb = "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
-			$cmd_hk = "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
+			
+			push @cmd_carb, "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
+			for my $Housekeeping_index(@Housekeeping_index_set)
+			{
+				push @cmd_hk, "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
+			}
 		}
 		else
 		{
@@ -154,8 +176,12 @@ while(my $line = <IN>)
 		my $reads2 =  $ele[2];
 		if(-e $reads1 and -e $reads2)
 		{
-			$cmd_carb = "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
-			$cmd_hk = "bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
+			
+			push @cmd_carb, "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
+			for my $Housekeeping_index(@Housekeeping_index_set)
+			{
+			 	push @cmd_hk,"bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
+			}
 		}
 		else
 		{
@@ -166,12 +192,26 @@ while(my $line = <IN>)
 	{
 		&err("Input file format error!");
 	}
-	&msg("Mapping to $CARB_Gene");
-	my $content_carb = `$cmd_carb`;
-	&msg("Mapping to $Housekeeping_gene");
-	my $content_hk = `$cmd_hk`;
-	my $hk_cn = &stat($content_hk,$fl);
-	my $carb_cn = &stat($content_carb,$fl);
+	my $carb_cn = 0;
+	my $total_carb = 0;
+	my $hk_cn = 0;
+	my $total_hk = 0;
+	for my $cmd(@cmd_carb)
+	{
+		&msg("Mapping to $CARB_Gene");
+		my $content_carb = `$cmd`;
+		$total_carb += &stat($content_carb,$fl);
+	}
+	$carb_cn = $total_carb/(scalar @cmd_carb);
+	my $i = 0;
+	for my $cmd(@cmd_hk)
+	{
+		&msg("Mapping to $Housekeeping_index_set[$i]");
+		my $content_hk = `$cmd`;
+		$total_hk += &stat($content_hk,$fl);
+		$i++;
+	}
+	$hk_cn = $total_hk/(scalar @cmd_hk);
 	my $ratio = $carb_cn/$hk_cn;
 	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\t",int($ratio+0.5),"\n";
 	&msg("All finished! Enjoy!");
@@ -257,6 +297,7 @@ sub setOptions {
     'Computation:',
     {OPT=>"flank=i",  VAR=>\$fl, DEFAULT=>100, DESC=>"The flanking length of sequence to be excluded"},
     {OPT=>"cpus=i",  VAR=>\$threads, DEFAULT=>1, DESC=>"Number of CPUs to use"},
+    {OPT=>"multiref!",  VAR=>\$multiref, DEFAULT=>0, DESC=>"Use the reads depth of all the available sequences"},
   );
 (!@ARGV) && (usage(1));
 
