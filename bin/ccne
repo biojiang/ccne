@@ -56,7 +56,7 @@ my %tools = (
   'bedtools' => {
     GETVER  => "bedtools 2>&1| grep -E 'Version: .+\$'",
     REGEXP  => qr/($BIDEC)/,
-    MINVER  => "2.9",
+    MINVER  => "2.29",
     NEEDED  => 1,
   }
 );
