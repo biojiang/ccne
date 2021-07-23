@@ -213,6 +213,10 @@ while(my $line = <IN>)
 	}
 	$hk_cn = $total_hk/(scalar @cmd_hk);
 	my $ratio = $carb_cn/$hk_cn;
+	if($ratio > 0 && $ratio < 0.5)
+	{
+		$ratio = 0.5;
+	}
 	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\t",int($ratio+0.5),"\n";
 	&msg("All finished! Enjoy!");
 }
