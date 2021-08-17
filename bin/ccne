@@ -122,7 +122,11 @@ else
 {
 	@Housekeeping_index_set = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
 }
-
+my $othreads = int($threads/2);
+if($othreads == 0)
+{
+        $othreads = 1;
+}
 my $CARB_index = "$dbdir/Carb/$CARB_Gene.fasta";
 #my $Housekeeping_index = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
 if(not -e $CARB_index)
@@ -159,10 +163,10 @@ while(my $line = <IN>)
 		if(-e $reads1)
 		{
 			
-			push @cmd_carb, "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
+			push @cmd_carb, "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d ";
 			for my $Housekeeping_index(@Housekeeping_index_set)
 			{
-				push @cmd_hk, "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
+				push @cmd_hk, "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d";
 			}
 		}
 		else
@@ -177,10 +181,10 @@ while(my $line = <IN>)
 		if(-e $reads1 and -e $reads2)
 		{
 			
-			push @cmd_carb, "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d ";
+			push @cmd_carb, "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d ";
 			for my $Housekeeping_index(@Housekeeping_index_set)
 			{
-			 	push @cmd_hk,"bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 - | samtools sort - | bedtools genomecov -ibam - -d";
+			 	push @cmd_hk,"bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d";
 			}
 		}
 		else
@@ -299,7 +303,7 @@ sub setOptions {
     'Outputs:',
     {OPT=>"out=s",  VAR=>\$output, DESC=>"Output file name (required)"},
     'Computation:',
-    {OPT=>"flank=i",  VAR=>\$fl, DEFAULT=>100, DESC=>"The flanking length of sequence to be excluded"},
+    {OPT=>"flank=i",  VAR=>\$fl, DEFAULT=>0, DESC=>"The flanking length of sequence to be excluded"},
     {OPT=>"cpus=i",  VAR=>\$threads, DEFAULT=>1, DESC=>"Number of CPUs to use"},
     {OPT=>"multiref!",  VAR=>\$multiref, DEFAULT=>0, DESC=>"Use the reads depth of all the available sequences"},
   );
