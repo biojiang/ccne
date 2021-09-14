@@ -383,7 +383,7 @@ sub list_db{
 sub list_sp{
   my @files = glob "$dbdir/Housekeeping/*.fasta";
   my %out = ();
-  map{$_ =~ /\/Housekeeping\/(.+)\.fasta/;my @tmp = split/\_/,$1;if(exists $out{$tmp[0]}){push @{$out{$tmp[0]}},$tmp[1];}else{@{$out{$tmp[0]}} = ($tmp[1]);}}@files;
+  map{$_ =~ /\/Housekeeping\/(.+)\.fasta/;my @tmp = split/\_/,$1,2;if(exists $out{$tmp[0]}){push @{$out{$tmp[0]}},$tmp[1];}else{@{$out{$tmp[0]}} = ($tmp[1]);}}@files;
   map{if($_ eq 'rpoB'){$_ = 'rpoB[default]'}}@{$out{'Ab'}};
   map{if($_ eq 'polB'){$_ = 'polB[default]'}}@{$out{'Ec'}};
   map{if($_ eq 'rpoB'){$_ = 'rpoB[default]'}}@{$out{'Kp'}};
