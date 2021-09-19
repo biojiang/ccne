@@ -303,7 +303,7 @@ Yru|*Yersinia ruckeri*|*glnA*
 **Smr**|*Serratia marcescens*|*rpoC*
 **Pmi**|*Proteus mirabilis*|*rpoB*
 
-**Species in blod are most commonly isolated species in clinical from [CHINET](http://www.chinets.com/Data/AntibioticDrugFast).**
+**Species in blod are most commonly isolated species in clinical.(Data come from [CHINET](http://www.chinets.com/Data/AntibioticDrugFast))**
 
 # Dependencies
 * **bwa**</br>
