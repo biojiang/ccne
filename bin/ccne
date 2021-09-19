@@ -34,10 +34,13 @@ my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
 my $EXE = $FindBin::RealScript;
 my $VERSION = "1.0.0";
 my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
-my (@Options,@LOG,$quiet,$multiref,$dbdir,$CARB_Gene, $SP, $Housekeeping_gene,$input,$output,$threads,$fl);
+my (@Options,@LOG,$quiet,$multiref,$dbdir,$AMR_Gene, $confdir,%info_sp,%info_amr,$SP, $Housekeeping_gene,$input,$output,$threads,$fl);
 $dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
-
+$confdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../config");
+my $cutoff = 0.01;
+my $cutoff_up = 0.5;
 &add_bundle_to_path();
+&loadconf();
 # table of tools needed and min versions
 my $BIDEC = '(\d+\.\d+)';  # pattern of NN.NN for versions that can be compared
 my %tools = (
@@ -106,11 +109,12 @@ sub check_all_tools {
 &setOptions();
 if(not defined $Housekeeping_gene)
 {
-	if($SP eq "Kp"){$Housekeeping_gene = 'rpoB';}
-	elsif($SP eq "Ab"){$Housekeeping_gene = 'rpoB';}
-	elsif($SP eq "Ec"){$Housekeeping_gene = 'polB';}
-	elsif($SP eq "Pa"){$Housekeeping_gene = 'ppsA';}
-	else{&err("--sp parameter error! Only Kp|Ab|Ec|Pa allowed!")}
+	if($SP eq "Pls"){&err("when --sp is set to Pls, --ref is required!")}
+	elsif(exists $info_sp{$SP})
+	{
+		$Housekeeping_gene = $info_sp{$SP}{'default'};
+	}
+	else{my $tmp = join("|", sort keys %info_sp);&err("--sp parameter error! Only $tmp allowed!")}
 }
 
 my @Housekeeping_index_set = ();
@@ -125,13 +129,13 @@ else
 my $othreads = int($threads/2);
 if($othreads == 0)
 {
-        $othreads = 1;
+	$othreads = 1;
 }
-my $CARB_index = "$dbdir/Carb/$CARB_Gene.fasta";
+my $AMR_index = "$dbdir/AMR/$info_amr{$AMR_Gene}{'id'}.fasta";
 #my $Housekeeping_index = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
-if(not -e $CARB_index)
+if(not -e $AMR_index)
 {
-	&err("$CARB_Gene index file not found!");
+	&err("$info_amr{$AMR_Gene}{'name'} index file not found!");
 }
 for my $Housekeeping_index(@Housekeeping_index_set)
 {
@@ -144,11 +148,11 @@ open IN,"<$input";
 open OUT,">$output";
 if($multiref == 1)
 {
-	print OUT "ID\tAverage reference reads depth\t$CARB_Gene reads depth\tratio\tEstimated $CARB_Gene copy number\n";
+	print OUT "ID\tAverage reference reads depth\t$info_amr{$AMR_Gene}{'name'} reads depth\tratio\tEstimated $info_amr{$AMR_Gene}{'name'} copy number\n";
 }
 else
 {
-	print OUT "ID\t$Housekeeping_gene reads depth\t$CARB_Gene reads depth\tratio\tEstimated $CARB_Gene copy number\n";
+	print OUT "ID\t$Housekeeping_gene reads depth\tSD of $Housekeeping_gene reads depth\t$info_amr{$AMR_Gene}{'name'} reads depth\tSD of $info_amr{$AMR_Gene}{'name'} reads depth\tratio\tEstimated $info_amr{$AMR_Gene}{'name'} copy number\n";
 }
 while(my $line = <IN>)
 {
@@ -163,7 +167,7 @@ while(my $line = <IN>)
 		if(-e $reads1)
 		{
 			
-			push @cmd_carb, "bwa mem $CARB_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d ";
+			push @cmd_carb, "bwa mem $AMR_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d ";
 			for my $Housekeeping_index(@Housekeeping_index_set)
 			{
 				push @cmd_hk, "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d";
@@ -181,7 +185,7 @@ while(my $line = <IN>)
 		if(-e $reads1 and -e $reads2)
 		{
 			
-			push @cmd_carb, "bwa mem $CARB_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d ";
+			push @cmd_carb, "bwa mem $AMR_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d ";
 			for my $Housekeeping_index(@Housekeeping_index_set)
 			{
 			 	push @cmd_hk,"bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -d";
@@ -200,11 +204,17 @@ while(my $line = <IN>)
 	my $total_carb = 0;
 	my $hk_cn = 0;
 	my $total_hk = 0;
+	my $carb_sd = 0;
+        my $hk_sd = 0;
 	for my $cmd(@cmd_carb)
 	{
-		&msg("Mapping to $CARB_Gene");
+		&msg("Mapping to $info_amr{$AMR_Gene}{'name'}");
 		my $content_carb = `$cmd`;
 		$total_carb += &stat($content_carb,$fl);
+		if($multiref == 0)
+		{
+			$carb_sd = &sd($content_carb,$fl,$total_carb);
+		}
 	}
 	$carb_cn = $total_carb/(scalar @cmd_carb);
 	my $i = 0;
@@ -213,18 +223,44 @@ while(my $line = <IN>)
 		&msg("Mapping to $Housekeeping_index_set[$i]");
 		my $content_hk = `$cmd`;
 		$total_hk += &stat($content_hk,$fl);
+		if($multiref == 0)
+		{
+			$hk_sd = &sd($content_hk,$fl,$total_hk);
+		}
 		$i++;
 	}
 	$hk_cn = $total_hk/(scalar @cmd_hk);
 	my $ratio = $carb_cn/$hk_cn;
-	if($ratio > 0 && $ratio < 0.5)
+	my $flag = 0;
+	if($ratio > $cutoff && $ratio < $cutoff_up)
 	{
-		$ratio = 0.5;
+		$flag = 1;
 	}
-	print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\t",int($ratio+0.5),"\n";
-	&msg("All finished! Enjoy!");
+	if($multiref == 0)
+	{
+		if($flag == 0)
+		{
+			print OUT $name,"\t",$hk_cn,"\t",$hk_sd,"\t",$carb_cn,"\t",$carb_sd,"\t",$ratio,"\t",int($ratio+0.5),"\n";
+		}
+		else
+		{
+			print OUT $name,"\t",$hk_cn,"\t",$hk_sd,"\t",$carb_cn,"\t",$carb_sd,"\t",$ratio,"\t1","\n";
+		}
+	}
+	else
+	{
+		if($flag == 0)
+		{
+			print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\t",int($ratio+0.5),"\n";
+		}
+		else
+		{
+			print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\t1","\n";
+		}
+	}
+	&msg("$name finished!");
 }
-
+&msg("All finished! Enjoy!");
 
 sub stat()
 {
@@ -240,11 +276,29 @@ sub stat()
                 my @ele = split/\t/,$line;
                 push @stat,$ele[-1];
         }
-        map{$sum+=$_;$i++;}@stat[$fl-1..$#stat-$fl];
+        map{$sum+=$_;$i++;}@stat[$fl..$#stat-$fl];
         return $sum/$i;
+	#return $stat[int(($#stat-$fl-$fl+1)/2)];
 }
 
-
+sub sd()
+{
+	my $content = shift;
+        my $fl = shift;
+	my $mean = shift;
+        my $sum = 0;
+        my $i = 0;
+        my @stat = ();
+        my @tmp = split/\n/,$content;
+        for my $line(@tmp)
+        {
+                chomp $line;
+                my @ele = split/\t/,$line;
+                push @stat,$ele[-1];
+        }
+        map{$sum+=($_-$mean)**2;$i++;}@stat[$fl..$#stat-$fl];
+        return sqrt($sum/$i);
+}
 #------------------------------------------------
 sub find_exe {
   my($bin) = shift;
@@ -293,12 +347,13 @@ sub setOptions {
     {OPT=>"quiet!",  VAR=>\$quiet, DEFAULT=>0, DESC=>"No screen output"},
     'Setup:',
     {OPT=>"dbdir=s",  VAR=>\$dbdir, DEFAULT=>$dbdir, DESC=>"CCNE database root folders"},
-    {OPT=>"listdb",   VAR=>\&list_db,  DESC=>"List all configured databases"},
+    {OPT=>"listdb",   VAR=>\&list_db,  DESC=>"List all configured AMRs"},
     {OPT=>"listsp",   VAR=>\&list_sp,  DESC=>"List all configured species and housekeeping genes"},
+    {OPT=>"fmtdb",   VAR=>\&fmtdb,  DESC=>"Format all the bwa index"},
     'Input:',
-    {OPT=>"carb=s",  VAR=>\$CARB_Gene,  DESC=>"Carbapenemase-encoding gene name, such as KPC-2, NDM-1, etc. Please refer to --listdb (required)"},
-    {OPT=>"sp=s",  VAR=>\$SP,  DESC=>"Species name[Kp|Ec|Ab|Pa](required)"},
-    {OPT=>"ref=s",  VAR=>\$Housekeeping_gene,  DESC=>"Reference gene defalut(Kp:rpoB Ab:rpoB Ec:polB Pa:ppsA), please refer to --listsp"},
+    {OPT=>"amr=s",  VAR=>\$AMR_Gene,  DESC=>"AMR gene name, such as KPC-2, NDM-1, etc or AMR ID. Please refer to --listdb (required)"},
+    {OPT=>"sp=s",  VAR=>\$SP,  DESC=>"Species name[Kp|Ec|Ab|Pa|Pls](required)"},
+    {OPT=>"ref=s",  VAR=>\$Housekeeping_gene,  DESC=>"Reference gene defalut(Kp:rpoB Ab:rpoB Ec:polB Pa:ppsA), please refer to --listsp.Note: When --sp is set to Pls, this parameter should be set to replicon type."},
     {OPT=>"in=s",  VAR=>\$input, DESC=>"Input file name (required)"},
     'Outputs:',
     {OPT=>"out=s",  VAR=>\$output, DESC=>"Output file name (required)"},
@@ -311,8 +366,8 @@ sub setOptions {
 
   &GetOptions(map {$_->{OPT}, $_->{VAR}} grep { ref } @Options) || usage(1);
   #Check required values
-  if(not defined $CARB_Gene){
-    &err("--carb required");
+  if(not defined $AMR_Gene){
+    &err("--amr required");
   }
   if(not defined $SP){
     &err("--sp required");
@@ -342,7 +397,7 @@ sub usage {
   print
     "Name:\n  ", ucfirst($EXE), " $VERSION by $AUTHOR\n",
     "Synopsis:\n  Carbapenemase-encoding gene copy number estimator\n",
-    "Usage:\n  $EXE --carb KPC-2 --sp Kp --in File.list --out result.txt\n";
+    "Usage:\n  $EXE --amr KPC-2 --sp Kpn --in File.list --out result.txt\n";
   foreach (@Options) {
     if (ref) {
       my $def = defined($_->{DEFAULT}) ? " (default '$_->{DEFAULT}')" : "";
@@ -371,11 +426,15 @@ sub version {
 
 #----------------------------------------------------------------------
 sub list_db{
-  my @files = glob "$dbdir/Carb/*.fasta";
-  my @out = ();
-  map{$_ =~ /\/Carb\/(.+)\.fasta/;push @out,$1;}@files;
-  print "Configured carbapenemase-encoding genes:\n";
-  print join("\n",@out),"\n";
+  my @files = glob "$dbdir/AMR/*.fasta";
+  my %out = ();
+  map{$_ =~ /\/AMR\/(.+)\.fasta/;if(exists $out{$info_amr{$1}{'class'}}){push @{$out{$info_amr{$1}{'class'}}},$info_amr{$1}{'name'}."[$info_amr{$1}{'id'}]";}else{@{$out{$info_amr{$1}{'class'}}}=($info_amr{$1}{'name'}."[$info_amr{$1}{'id'}]");}}@files;
+  print "Configured AMR genes[IDs]:\n";
+  for my $k(sort keys %out)
+  {
+	print $k,":\n";
+  	print join("|",sort @{$out{$k}}),"\n";
+  }
   exit;
 }
 
@@ -383,21 +442,33 @@ sub list_db{
 sub list_sp{
   my @files = glob "$dbdir/Housekeeping/*.fasta";
   my %out = ();
-  map{$_ =~ /\/Housekeeping\/(.+)\.fasta/;my @tmp = split/\_/,$1;if(exists $out{$tmp[0]}){push @{$out{$tmp[0]}},$tmp[1];}else{@{$out{$tmp[0]}} = ($tmp[1]);}}@files;
-  map{if($_ eq 'rpoB'){$_ = 'rpoB[default]'}}@{$out{'Ab'}};
-  map{if($_ eq 'polB'){$_ = 'polB[default]'}}@{$out{'Ec'}};
-  map{if($_ eq 'rpoB'){$_ = 'rpoB[default]'}}@{$out{'Kp'}};
-  map{if($_ eq 'ppsA'){$_ = 'ppsA[default]'}}@{$out{'Pa'}};
-  for my $k(keys %out)
+  map{$_ =~ /\/Housekeeping\/(.+)\.fasta/;my @tmp = split/\_/,$1,2;if(exists $out{$tmp[0]}){push @{$out{$tmp[0]}},$tmp[1];}else{@{$out{$tmp[0]}} = ($tmp[1]);}}@files;
+  print "Configured species and housekeeping genes:\n";
+  for my $k(sort keys %out)
   {
-        print $k,":",join("|",@{$out{$k}}),"\n";
-
+	if($k eq 'Pls')
+	{
+		print $k,"(Plasmid replicon):",join("|",@{$out{$k}}),"\n";
+	}
+	else
+	{
+		map{if($_ eq $info_sp{$k}{'default'}){$_ = $_.'[default]'}}@{$out{$k}};
+        	print $k,"($info_sp{$k}{'name'})",":",join("|",@{$out{$k}}),"\n";
+	}
 
   }
   exit;
 }
 
-
+#----------------------------------------------------------------------
+sub fmtdb()
+{
+	my @amrs = glob "$dbdir/AMR/*.fasta";
+	my @hks = glob "$dbdir/Housekeeping/*.fasta";
+	map{system("bwa index $_");}@amrs;
+	map{system("bwa index $_");}@hks;
+	exit;
+}
 #----------------------------------------------------------------------
 
 sub add_bundle_to_path {
@@ -408,3 +479,49 @@ sub add_bundle_to_path {
     }
   }
 }
+#----------------------------------------------------------------------
+
+sub loadconf()
+{
+	msg("Loading configure infomation");
+	if(not -e "$confdir/species_code.tab")
+	{
+		&err("File species_code.tab not found in $confdir");	
+	}
+	else
+	{
+		open CONF,"<$confdir/species_code.tab";
+		<CONF>;
+		while(my $line = <CONF>)
+		{
+			chomp $line;
+			my @ele = split/\t/,$line;
+			$info_sp{$ele[0]}{'name'} = $ele[1];
+			$info_sp{$ele[0]}{'default'} = $ele[2];
+		}
+	}
+	if(not -e "$confdir/CARD_AMR_clustered.csv")
+	{
+		&err("File CARD_AMR_clustered.csv not found in $confdir");
+	}
+	else
+	{
+		open CONF,"<$confdir/CARD_AMR_clustered.csv";
+		<CONF>;
+		while(my $line = <CONF>)
+		{
+			chomp $line;
+			my @ele = split/\,/,$line;
+			$info_amr{$ele[1]}{'id'} = $ele[5];
+			$info_amr{$ele[1]}{'name'} = $ele[1];
+			$info_amr{$ele[5]}{'id'} = $ele[5];
+                        $info_amr{$ele[5]}{'name'} = $ele[1];
+			$info_amr{$ele[1]}{'class'} = $ele[2];
+                        $info_amr{$ele[5]}{'class'} = $ele[2];
+		}
+	}
+}
+
+
+
+

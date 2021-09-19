@@ -1,0 +1,112 @@
+#Code	Species	Default housekeeping gene
+Aba	Acinetobacter baumannii	rpoB
+Ach	Achromobacter	rpoB
+Aer	Aeromonas	gltA
+Arc	Arcobacter	gltA
+Aap	Anaplasma aphagocytophilum	atpA
+Bcc	Burkholderia cepacia	atpD	
+Bce	Bacillus cereus	glp
+Bha	Brachyspira hampsonii	adh
+Bhe	Bartonella henselae	rpoB
+Bhy	Brachyspira hyodysenteriae	adh
+Bin	Brachyspira intermedia	adh
+Bli	Bacillus licheniformis	rpoB
+Bpe	Bordetella pertussis	adk
+Bor	Borrelia	clpA
+Bpi	Brachyspira pilosicoli	adh
+Bps	Burkholderia  pseudomallei	ace
+Bra	Brachyspira	adh
+Bsu	Bacillus subtilis	glpF
+Cco	Campylobacter coli	aspA
+Cje	Campylobacter jejuni	aspA
+Cbo	Clostridium botulinum	rpoB
+Ccn	Campylobacter concisus	aspA
+Cdi	Clostridium  difficile	adk
+Pdi	Peptoclostridium difficile	adk
+Cdp	Corynebacterium diphtheriae	rpoB
+Cfe	Campylobacter fetus	aspA
+Cfr	Citrobacter freundii	mdh
+Che	Campylobacter helveticus	aspA
+Chl	Chlamydia	enoA
+Chy	Campylobacter hyointestinalis	aspA
+Cin	Campylobacter insulaenigrae	aspA
+Cla	Campylobacter lanienae	aspA
+Clr	Campylobacter lari	adk
+Cma	Carnobacterium maltaromaticum	dapE
+Cro	Cronobacter	atpD
+Cse	Clostridium septicum	ddl
+Csp	Campylobacter sputorum	aspA
+Cup	Campylobacter upsaliensis	adk
+Ecl	Enterobacter cloacae	rpoB
+Eco	Escherichia	mdh
+Shi	Shigella	rpoB
+Eta	Edwardsiella tarda	adk
+Efa	Enterococcus  faecalis	aroE
+Efm	Enterococcus  faecium	adk
+Fps	Flavobacterium psychrophilum	atpA
+Hci	Helicobacter cinaedi	aroE
+Hin	Haemophilus influenzae	adk
+Hpa	Haemophilus parasuis	rpoB
+Hpy	Helicobacter pylori	atpA
+Hsu	Haematopinus suis	atpA
+Kki	Kingella kingae	abcZ
+Kox	Klebsiella oxytoca	rpoB
+Kpn	Klebsiella pneumoniae	rpoB
+Kae	Klebsiella aerogenes	rpoB
+Lep	Leptospira	adk
+Lmo	Listeria  monocytogenes	abcZ
+Lsa	Lactobacillus salivarius	nrdB
+Mab	Mycobacterium abscessus	rpoB
+Mag	Mycoplasma agalactiae	dnaA
+Mbo	Mycoplasma bovis	adh1
+Mca	Moraxella catarrhalis	abcZ
+Mha	Mannheimia haemolytica	adk
+Mhy	Mycoplasma hyorhinis	rpoB
+Mma	Mycobacterium massiliense	rpoB
+Mpl	Melissococcus plutonius	argE
+Nei	Neisseria	abcZ
+Orh	Ornithobacterium rhinotracheale	mdh
+Ots	Orientia tsutsugamushi	mdh
+Pac	Propionibacterium acnes	aroE
+Pae	Pseudomonas  aeruginosa	ppsA
+Pfl	Pseudomonas  fluorescens	glnS
+Pgi	Porphyromonas  gingivalis	ftsQ
+Pla	Paenibacillus larvae	rpoB
+Pmu	Pasteurella multocida	adk
+Ppe	Pediococcus pentosaceus	dalR
+Ran	Riemerella anatipestifer	rpoB
+Sag	Streptococcus agalactiae	adhP
+Pau	Staphylococcus aureus	arcC
+Sca	Streptococcus canis	gki
+Sdy	Streptococcus dysgalactiae	atoB
+Sen	Salmonella enterica	aroC
+Sep	Staphylococcus epidermidis	arcC
+Sga	Streptococcus gallolyticus	aroE
+Sha	Staphylococcus haemolyticus	arcC
+Sho	Stapylococcus hominis	arcC
+Sin	Sinorhizobium	asd
+Slu	Staphylococcus lugdunensis	aroE
+Sma	Stenotrophomonas maltophilia	atpD
+Sor	Streptococcus oralis	aroE
+Spn	Streptococcus pneumoniae	aroE
+Sps	Staphylococcus pseudintermedius	ack
+Spy	Streptococcus pyogenes	gki
+Ssu	Streptococcus suis	aroA
+Sth	Streptococcus thermophilus	rpoB
+Str	Streptomyces	atpD
+Sub	Streptococcus uberis	arcC
+Seq	Streptococcus equi	arcC
+Tay	Taylorella	adk
+Ten	Tenacibaculum	atpA
+Vch	Vibrio cholerae	adk
+Vib	Vibrio	atpA
+Vpa	Vibrio parahaemolyticus	dnaE
+Vta	Vibrio tapetis	atpA
+Vvu	Vibrio vulnificus	dtdS
+Wol	Wolbachia	coxA
+Xfa	Xylella fastidiosa	cysG
+Yer	Yersinia	aarF
+Yps	Yersinia pseudotuberculosis	adk
+Yru	Yersinia ruckeri	glnA
+Smr	Serratia marcescens	rpoC
+Pmi	Proteus mirabilis	rpoB
