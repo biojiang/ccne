@@ -1,9 +1,9 @@
 # ccne: Carbapenemase-encoding gene Copy Number Estimator
 # Introduction
-Carbapenemase-encoding gene Copy Number Estimator (ccne) is a tool to estimate the copy number of carbapenemase-encoding gene. It uses housekeeping gene as the reference and compares the count of reads that mapped to carbapenemase-encoding genes with the count of reads that mapped to the reference gene. 
+Carbapenemase-encoding gene Copy Number Estimator (ccne) is a tool to estimate the copy number of AMR genes. It uses housekeeping gene as the reference and compares the count of reads that mapped to AMR genes with the count of reads that mapped to the reference gene. 
 # Quick start
 ```
-$ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
+$ ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
 All finished! Enjoy!
 
 $ ls
@@ -13,8 +13,8 @@ $ head File.list
 SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 
 $ head result.txt
-ID	rpoB reads coverage	KPC-2 reads coverage	ratio Estimated KPC-2 copy number
-SRR14561347	767.177023498695	2398.69106881406	3.12664612643751  3
+ID	rpoB reads depth  SD of rpoB reads depth  KPC-2 reads depth SD of KPC-2 reads depth Ratio Estimated KPC-2 copy number
+SRR14561347 766.040208488459  64.5952660470369  2418.11451247166  112.252829680359  3.15664176067605  3
 ```
 # Installation
 ## Source
@@ -41,25 +41,27 @@ Name:
 Synopsis:
   Carbapenemase-encoding gene copy number estimator
 Usage:
-  ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
+  ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
 General:
   --help             This help
   --version          Print version and exit
   --quiet            No screen output (default OFF)
 Setup:
-  --dbdir [X]        CCNE database root folders (default '/ccne/data')
-  --listdb           List all configured databases
+  --dbdir [X]        CCNE database root folders (default '$CCNE_bin/db')
+  --listdb           List all configured AMRs
   --listsp           List all configured species and housekeeping genes
+  --fmtdb            Format all the bwa index
 Input:
-  --carb [X]         Carbapenemase-encoding gene name, such as KPC-2, NDM-1, etc. Please refer to --listdb (required)
-  --sp [X]           Species name[Kp|Ec|Ab|Pa](required)
-  --ref [X]          Reference gene defalut(Kp:rpoB Ab:rpoB Ec:polB Pa:ppsA), please refer to --listsp
+  --amr [X]          AMR gene name, such as KPC-2, NDM-1, etc or AMR ID. Please refer to --listdb (required)
+  --sp [X]           Species name[Kpn|Eco|Aba|Pae|Pls|...]. Please refer to --listsp. (required)
+  --ref [X]          Reference gene defalut(such as Kpn:rpoB Aba:rpoB Eco:polB Pae:pps), please refer to --listsp. Note: When --sp is set to Pls, this parameter should be set to a replicon type.
   --in [X]           Input file name (required)
 Outputs:
   --out [X]          Output file name (required)
 Computation:
-  --flank [N]        The flanking length of sequence to be excluded (default '100')
+  --flank [N]        The flanking length of sequence to be excluded (default '0')
   --cpus [N]         Number of CPUs to use (default '1')
+  --multiref         Use the reads depth of all the available sequences (default OFF)
 
 ```
 # Running
@@ -71,12 +73,14 @@ Computation:
 The ccne will output the result to the file with the name the user provided.
 ## Columns in the output file
 Name|Description
----|:--
-ID|The sample ID user provided in the input file
-rpoB reads coverage|The estimated reads coverage of the input reference housekeeping gene
-KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
-ratio|Divide the reads coverage of carbapenemase-encoding gene into that of housekeeping gene
-Estimated KPC-2 copy number|Rounding of ratio
+|:---|:--
+|ID|The sample ID user provided in the input file
+|rpoB reads coverage|The estimated reads coverage of the input reference housekeeping gene
+|SD of rpoB reads coverage|The standard deviation of rpoB reads coverage
+|KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
+|SD of KPC-2 reads coverage|The standard deviation of KPC-2 reads coverage
+|Ratio|Divide the reads coverage of AMR gene into that of housekeeping gene
+|Estimated KPC-2 copy number|Rounding of ratio
 ## Tutorial
 1. Fetch the reads files (SRR14561347) in fastq format from NCBI SRA database. (SRR14561347 generated from a *Klebsiella pneumoinae* clinical isolate with triple KPC-2 encoding genes on the plasmid)
 ```
@@ -93,14 +97,30 @@ SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 ```
 4. Run ccne.
 ```
-$ ccne --carb KPC-2 --sp Kp --in File.list --out result.txt
+$ ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
 ```
 5. Check the result.
 ```
 $ head result.txt
-ID	rpoB reads coverage	KPC-2 reads coverage	ratio Estimated KPC-2 copy number
-SRR14561347	767.177023498695	2398.69106881406	3.12664612643751  3
+ID	rpoB reads depth  SD of rpoB reads depth  KPC-2 reads depth SD of KPC-2 reads depth Ratio Estimated KPC-2 copy number
+SRR14561347 766.040208488459  64.5952660470369  2418.11451247166  112.252829680359  3.15664176067605  3
 ```
+## AMR genes in ccne
+|Type|Gene name[code]
+|:---|:--
+|AGly|
+|Bla|
+|Col|
+|Fcyn|
+|Flq|
+|Gly|
+|MLS|
+|Phe|
+|Rif|
+|Sul|
+|Tet|
+|Tgc|
+|Tmt|
 # Dependencies
 * **bwa**</br>
 Used for reads mapping</br>
