@@ -191,12 +191,12 @@ Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/mast
 ## Species codes and default housekeeping genes
 Codes in ccne|Species|Default housekeeping genes
 |:---|:---|:---
-**Aba**|*Acinetobacter baumannii*|*rpoB*
+Aba|***Acinetobacter baumannii***|*rpoB*
 Ach|*Achromobacter spp.*|*rpoB*
 Aer|*Aeromonas spp.*|*gltA*
 Arc|*Arcobacter spp.*|*gltA*
 Aap|*Anaplasma aphagocytophilum*|*atpA*
-**Bcc**|*Burkholderia cepacia*|*atpD*
+Bcc|***Burkholderia cepacia***|*atpD*
 Bce|*Bacillus cereus*|*glp*
 Bha|*Brachyspira hampsonii*|*adh*
 Bhe|*Bartonella henselae*|*rpoB*
@@ -229,22 +229,22 @@ Cro|*Cronobacter spp.*|*atpD*
 Cse|*Clostridium septicum*|*ddl*
 Csp|*Campylobacter sputorum*|*aspA*
 Cup|*Campylobacter upsaliensis*|*adk*
-**Ecl**|*Enterobacter cloacae*|*rpoB*
-**Eco**|*Escherichia spp.*|*rpoB*
+Ecl|***Enterobacter cloacae***|*rpoB*
+Eco|***Escherichia spp.***|*rpoB*
 Shi|*Shigella spp.*|*rpoB*
 Eta|*Edwardsiella tarda*|*adk*
-**Efa**|*Enterococcus faecalis*|*aroE*
-**Efm**|*Enterococcus faecium*|*adk*
+Efa|***Enterococcus faecalis***|*aroE*
+Efm|***Enterococcus faecium***|*adk*
 Fps|*Flavobacterium psychrophilum*|*atpA*
 Hci|*Helicobacter cinaedi*|*aroE*
-**Hin**|*Haemophilus influenzae*|*adk*
+Hin|***Haemophilus influenzae***|*adk*
 Hpa|*Haemophilus parasuis*|*rpoB*
 Hpy|*Helicobacter pylori*|*atpA*
 Hsu|*Haematopinus suis*|*atpA*
 Kki|*Kingella kingae*|*abcZ*
-**Kox**|*Klebsiella oxytoca*|*rpoB*
-**Kpn**|*Klebsiella pneumoniae*|*rpoB*
-**Kae**|*Klebsiella aerogenes*|*rpoB*
+Kox|***Klebsiella oxytoca***|*rpoB*
+Kpn|***Klebsiella pneumoniae***|*rpoB*
+Kae|***Klebsiella aerogenes***|*rpoB*
 Lep|*Leptospira spp.*|*adk*
 Lmo|*Listeria monocytogenes*|*abcZ*
 Lsa|*Lactobacillus salivarius*|*nrdB*
@@ -260,29 +260,29 @@ Nei|*Neisseria spp.*|*abcZ*
 Orh|*Ornithobacterium rhinotracheale*|*mdh*
 Ots|*Orientia tsutsugamushi*|*mdh*
 Pac|*Propionibacterium acnes*|*aroE*
-**Pae**|*Pseudomonas aeruginosa*|*ppsA*
+Pae|***Pseudomonas aeruginosa***|*ppsA*
 Pfl|*Pseudomonas fluorescens*|*glnS*
 Pgi|*Porphyromonas gingivalis*|*ftsQ*
 Pla|*Paenibacillus larvae*|*rpoB*
 Pmu|*Pasteurella multocida*|*adk*
 Ppe|*Pediococcus pentosaceus*|*dalR*
 Ran|*Riemerella anatipestifer*|*rpoB*
-**Sag**|*Streptococcus agalactiae*|*adhP*
-**Pau**|*Staphylococcus aureus*|*arcC*
+Sag|***Streptococcus agalactiae***|*adhP*
+Pau|***Staphylococcus aureus***|*arcC*
 Sca|*Streptococcus canis*|*gki*
 Sdy|*Streptococcus dysgalactiae*|*atoB*
 Sen|*Salmonella enterica*|*aroC*
-**Sep**|*Staphylococcus epidermidis*|*arcC*
+Sep|***Staphylococcus epidermidis***|*arcC*
 Sga|*Streptococcus gallolyticus*|*aroE*
 Sha|*Staphylococcus haemolyticus*|*arcC*
-**Sho**|*Stapylococcus hominis*|*arcC*
+Sho|***Stapylococcus hominis***|*arcC*
 Sin|*Sinorhizobium spp.*|*asd*
 Slu|*Staphylococcus lugdunensis*|*aroE*
-**Sma**|*Stenotrophomonas maltophilia*|*atpD*
+Sma|***Stenotrophomonas maltophilia***|*atpD*
 Sor|*Streptococcus oralis*|*aroE*
-**Spn**|*Streptococcus pneumoniae*|*aroE*
+Spn|***Streptococcus pneumoniae***|*aroE*
 Sps|*Staphylococcus pseudintermedius*|*ack*
-**Spy**|*Streptococcus pyogenes*|*gki*
+Spy|***Streptococcus pyogenes***|*gki*
 Ssu|*Streptococcus suis*|*aroA*
 Sth|*Streptococcus thermophilus*|*rpoB*
 Str|*Streptomyces spp.*|*atpD*
@@ -300,8 +300,8 @@ Xfa|*Xylella fastidiosa*|*cysG*
 Yer|*Yersinia spp.*|*aarF*
 Yps|*Yersinia pseudotuberculosis*|*adk*
 Yru|*Yersinia ruckeri*|*glnA*
-**Smr**|*Serratia marcescens*|*rpoC*
-**Pmi**|*Proteus mirabilis*|*rpoB*
+Smr|***Serratia marcescens***|*rpoC*
+Pmi|***Proteus mirabilis***|*rpoB*
 
 **Species in blod are most commonly isolated species in clinical. (Data come from the [CHINET](http://www.chinets.com/Data/AntibioticDrugFast))**
 
