@@ -305,6 +305,16 @@ Pmi|***Proteus mirabilis***|*rpoB*
 
 **Species in blod are most commonly isolated species in clinical. (Data come from the [CHINET](http://www.chinets.com/Data/AntibioticDrugFast))**
 
+# Q&A
+1. How the reference genes in ccne were determined?
+
+   The reference genes in ccne are single copy housekeeping genes. If the species has been curated in [pubMLST](https://pubmlst.org/), then the hosuekeeping genes in pubMLST will be used. Usually, the fisrt allele will be used as the reference in ccne. Otherwise, the reference genome and gene model of the species will be download from NCBI GenBank. The [busco](https://busco.ezlab.org/) is used to determine the single copy genes. By reads simulation and mapping, the top 10 single copy genes with the lowest RMSE (the comparison between base pair wise read depths and simulated read depth) are selected as the reference genes.
+   
+2. How to interpret the SD of reads depth?
+
+   The SD of reads depth is the standard deviation of reads depth of a gene. If this value is large, then the reads depth will be unreliable. In our practical analysis, the SD of reads depth is usually less than 15% of the mean.
+   
+
 # Dependencies
 * **bwa**</br>
 Used for reads mapping</br>
