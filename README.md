@@ -106,23 +106,29 @@ ID	rpoB reads depth  SD of rpoB reads depth  KPC-2 reads depth SD of KPC-2 reads
 SRR14561347 766.040208488459  64.5952660470369  2418.11451247166  112.252829680359  3.15664176067605  3
 ```
 ## AMR genes (2412 genes) in ccne
-|Antimicrobial agents|Gene name
-|:---|:--
-|Aminoglycosides|AAC(2'), AAC(3), AAC(6'), ANT(3''), APH(2''), ANT(2''), ANT(4'), ANT(6), ANT(9), APH(3''), APH(3'), APH(4), APH(6), APH(7''), APH(9), ApmA, ArmA, KamB, NpmA, RmtA, RmtB, RmtC, RmtD, RmtE, RmtF, RmtG, RmtH, SAT, Sgm, Sta, StrA, StrB
-|β-lactams|ACC, ACI, ACT, ADC, AER, AIM, AmpC1, AQU, ARL, AST-1, BAT-1, BcI, BcII, BCL-1, BEL, BES, BIC, BIL, BJP, BKC, Bla1, Bla2, blaA, blaB21, blaF, BPU-1, BRO, BUT-1, CAM-1, CARB, CAU, CblA, CBP, CepA, CepS, CfiA, CfxA, CGA, CGB, CIA, CKO, CME, CMH, CMY, CphA, CPS, CTX-M, DES, DHA, DIM, EBR, ERP, ESP, FAR, FEZ, FIM, FONA, FOX, FPH, FRI, FTU, GES, GIM, GOB, HERA, HMB, IMI, IMP, IND, JOHN-1, KHM, KPC, L1, LAP, LCR, LHK, LRA, MIR, MOX, MSI, MUS, NDM, NPS, OCH, OXA, OXY, PC1, PDC, PEDO, PER, PNGM, R39, RCP, RHO, RM3, ROB, RSA, SCO, SDA-A, SED, SFB, SFH, SHV-OKP-LEN, SIM, SLB, SMB, SME, SPG, SPM, SRT, TEM, THIN-B, TLA, TMB, TRU, TUS, VCC, VEB, VIM, SFO-1
-|Colistin|ICR-Mo, Mcr1, Mcr2, Mcr3, Mcr4, Mcr5, Mcr6, Mcr7, Mcr8, Mcr9
-|Fosfomycin|Fom, FosA, FosB, FosC, FosD, FosK, FosX
-|Fluoroquinolone|CrpP, NorA, QepA, Qnr, QnrA, QnrB, QnrC, QnrD, QnrE, QnrS, QnrVC
-|Glycopeptide|VanA, VanB, VanC, VanD, VanE, VanF, VanG, VanHA, VanHB, VanHD, VanHE, VanHM, VanHO, VanI, VanJ, VanL, VanM, VanN, VanO, VanRA, VanRB, VanRC, VanRD, VanRE, VanRF, VanRG, VanRI, VanRL, VanRM, VanRN, VanRO, VanSA, VanSB, VanSC, VanSD, VanSE, VanSF, VanSG, VanSL, VanSM, VanSN, VanSO, VanTC, VanTE, VanTG, VanTmL, VanTN, VanTrL, VanUG, VanVB, VanWB, VanWG, VanWI, VanXA, VanXB, VanXD, VanXE, VanXI, VanXM, VanXO, VanXYC, VanXYE, VanXYG, VanXYL, VanXYN, VanYA, VanYB, VanYD, VanYF, VanYG1, VanYM, VanZA, VanZF
-|Macrolides|MefB, Mel, CarA, CfrA, CfrB, CfrC, clbB, clbC, clcD, Emt, EreA, EreB, EreD, Erm, gimA, LinG, LnuA, LnuB, LnuC, LnuD, LnuF, LnuG, LnuP, LsaA, LsaB, LsaC, LsaE, MgtA, MphA, MphB, MphC, MphE, MphF, MphG, MphH, MphI, MphJ, MphK, MphL, MphM, MphN, MphO, MsrA, MsrC, MsrE, MyrA, OleB, OleC, OleD, OleI, OptrA, PoxtA, SrmB, TirC, TvaA, VatA, VatB, VatC, VatD, VatE, VatF, VatH, VatI, VgaA, VgaB, VgaC, VgaD, VgaE, VgbA, VgbB, VgbC, VmlR
-|Phenicols|Cat, CmlA, CmlB, CmlR, CmlV, Cmr, CmrA, FloR, PexA, CatBx
-|Rifampin|Arr, IRI, RphB
-|Sulfonamide|Sul
-|Tetracycline|OtrA, OtrB, OtrC, Tcr3, Tet-30, Tet-31, Tet-32, Tet-33, Tet-35, Tet-36, Tet-37, Tet-38, Tet-39, Tet-40, Tet-41, Tet-42, Tet-43, Tet-44, Tet-45, Tet-48, Tet-49, Tet-50, Tet-51, Tet-52, Tet-53, Tet-54, Tet-55, Tet-56, Tet-59, TetA, TetB, TetC, TetD, TetE, TetG, TetH, TetJ, TetK, TetL, TetM, TetO, TetQ, TetS, TetT, TetU, TetV, TetW, TetX, TetY, TetZ
-|Tigecycline|TetX, tmexC, tmexD, toprJ
-|Trimethoprim|Dfr
+|Antimicrobial agents|Subtypes|Gene or protein names1
+|:---|:--|:---
+|Aminoglycosides||AAC(2')(7), AAC(3)(20), AAC(6')(65), ANT(2'')(1), ANT(3'')(35), ANT(4')(4), ANT(6)(5), ANT(9)(2), APH(2'')(7), APH(3'')(3), APH(3')(18), APH(4)(2), APH(6)(7), APH(7'')(1), APH(9)(3), ApmA(1), ArmA(1), KamB(1), NpmA(1), RmtA(1), RmtB(1), RmtC(1), RmtD(2), RmtE(2), RmtF(1), RmtG(1), RmtH(1), SAT(3), Sgm(1), Sta(1), StrA(1), StrB(1)
+|β-lactams|β-lactamase|ACC(4), ACT(35), ADC(14), AER(1), AIM(1), AQU(3), ARL(6), AST-1(1), AmpC1(1), BAT-1(1), BCL-1(1), BIL(1), BJP(1), BPU-1(1), BRO(3), BUT-1(1), BcI(1), BcII(1), Bla1(1), Bla2(1), CAM-1(1), CARB(20), CAU(1), CBP(1), CKO(1), CMH(1), CMY(114), CPS(1), CblA(1), CepS(1), CfiA(1), CfxA(4), CphA(10), DHA(19), EBR(1), ESP(1), FEZ(1), FONA(6), FOX(9), FTU(1), GES(4), GIM(2), GOB(13), HERA(7), HMB(1), IND(16), JOHN-1(1), KHM(1), L1(1), LAP(2), LCR(1), LHK(1), LRA(13), MIR(16), MOX(9), MSI(2), MUS(2), NPS(1), OXA(114), PC1(1), PDC(10), PEDO(3), PNGM(1), R39(1), RCP(1), RHO(1), RM3(1), ROB(2), RSA(2), SCO(1), SDA-A(1), SED(1), SFB(1), SIM(1), SLB(1), SMB(1), SPG(1), SRT(1), TEM(51), THIN-B(1), TMB(1), TRU(1), TUS(1), blaA(1), blaB21(1), blaF(1)
+|β-lactams|ESBL|ACI(1), ADC(32), BEL(3), BES(1), CARB(1), CGA(1), CIA(4), CME(1), CMY(5), CTX-M(141), CepA(1), CfxA(3), DES(1), ERP(1), FAR(1), GES(9), OCH(8), OXA(25), OXY(24), PDC(3), PER(7), SFO-1(1), SHV-OKP-LEN(42), SRT(1), TEM(84), TLA(4), VEB(10)
+|β-lactams|Carbapenem|BIC(1), BKC(1), CGB(1), CTX-M(1), DIM(1), EBR(1), FIM(1), FPH(1), FRI(3), GES(13), IMI(7), IMP(48), KPC(20), NDM(27), OXA(300), SFH(1), SME(5), SPM(1), TMB(1), VCC(1), VIM(40)
+|β-lactams|Chromosomal β-lactamase|SHV-OKP-LEN(163)
+|β-lactams|Inhibitor-resistant β-lactamase|SHV-OKP-LEN(6), TEM(23)
+|β-lactams|Inhibitor-resistant ESBL|TEM(9)
+|Colistin||ICR-Mo(1), Mcr1(14), Mcr2(2), Mcr3(12), Mcr4(5), Mcr5(2), Mcr6(1), Mcr7(1), Mcr8(1), Mcr9(1)
+|Fosfomycin||Fom(2), FosA(4), FosB(7), FosC(2), FosD(1), FosK(1), FosX(2)
+|Fluoroquinolone||CrpP(1), NorA(1), QepA(1), Qnr(1), QnrA(7), QnrB(71), QnrC(1), QnrD(2), QnrE(2), QnrS(12), QnrVC(6)
+|Glycopeptide||VanA(1), VanB(1), VanC(1), VanD(1), VanE(1), VanF(1), VanG(1), VanHA(1), VanHB(1), VanHD(1), VanHE(1), VanHM(1), VanHO(1), VanI(1), VanJ(1), VanL(1), VanM(1), VanN(1), VanO(1), VanRA(1), VanRB(1), VanRC(1), VanRD(1), VanRE(1), VanRF(1), VanRG(1), VanRI(1), VanRL(1), VanRM(1), VanRN(1), VanRO(1), VanSA(1), VanSB(1), VanSC(1), VanSD(1), VanSE(1), VanSF(1), VanSG(1), VanSL(1), VanSM(1), VanSN(1), VanSO(1), VanTC(1), VanTE(1), VanTG(1), VanTN(1), VanTmL(1), VanTrL(1), VanUG(1), VanVB(1), VanWB(1), VanWG(1), VanWI(1), VanXA(1), VanXB(1), VanXD(1), VanXE(1), VanXI(1), VanXM(1), VanXO(1), VanXYC(1), VanXYE(1), VanXYG(1), VanXYL(1), VanXYN(1), VanYA(1), VanYB(1), VanYD(1), VanYF(1), VanYG1(1), VanYM(1), VanZA(1), VanZF(1)
+|Macrolides||CarA(1), CfrA(1), CfrB(1), CfrC(1), Emt(1), EreA(2), EreB(1), EreD(1), Erm(47), LinG(1), LnuA(1), LnuB(1), LnuC(1), LnuD(1), LnuF(2), LnuG(1), LnuP(1), LsaA(1), LsaB(1), LsaC(1), LsaE(1), MefB(1), Mel(1), MgtA(1), MphA(1), MphB(2), MphC(2), MphE(2), MphF(1), MphG(1), MphH(1), MphI(1), MphJ(1), MphK(1), MphL(1), MphM(1), MphN(1), MphO(1), MsrA(2), MsrC(2), MsrE(1), MyrA(1), OleB(1), OleC(1), OleD(1), OleI(1), OptrA(1), PoxtA(1), SrmB(1), TirC(1), TvaA(1), VatA(1), VatB(1), VatC(1), VatD(2), VatE(1), VatF(1), VatH(1), VatI(1), VgaA(2), VgaB(1), VgaC(1), VgaD(1), VgaE(2), VgbA(1), VgbB(1), VgbC(1), VmlR(1), clbB(1), clbC(1), clcD(1), gimA(1)
+|Phenicols||Cat(33), CatBx(1), CmlA(5), CmlB(2), CmlR(1), CmlV(1), Cmr(1), CmrA(2), FloR(2), PexA(1)
+|Rifampin||Arr(7), IRI(1), RphB(1)
+|Sulfonamide||Sul(4)
+|Tetracycline||OtrA(1), OtrB(1), OtrC(1), Tcr3(1), Tet-30(1), Tet-31(1), Tet-32(2), Tet-33(1), Tet-35(1), Tet-36(1), Tet-37(1), Tet-38(1), Tet-39(1), Tet-40(1), Tet-41(1), Tet-42(1), Tet-43(1), Tet-44(1), Tet-45(1), Tet-48(1), Tet-49(1), Tet-50(1), Tet-51(1), Tet-52(1), Tet-53(1), Tet-54(1), Tet-55(1), Tet-56(1), Tet-59(1), TetA(7), TetB(6), TetC(1), TetD(1), TetE(2), TetG(2), TetH(2), TetJ(1), TetK(1), TetL(2), TetM(2), TetO(1), TetQ(1), TetS(1), TetT(1), TetU(1), TetV(1), TetW(2), TetX(1), TetY(1), TetZ(1)
+|Tigecycline||TetX(2), tmexC(1), tmexD(1), toprJ(1)
+|Trimethoprim||Dfr(52)
 
-Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/master/kleborate/data/CARD_AMR_clustered.csv) in Kleborate
+1Numbers in the last brackets are the number of alleles.
+Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/master/kleborate/data/CARD_AMR_clustered.csv) in Kleborate.
 
 ## Supported species
 |Class|Group/Family|Genus|Species
