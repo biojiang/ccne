@@ -186,7 +186,22 @@ Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/mast
 ||Mycoplasmataceae|*Mycoplasma*|*Mycoplasma agalactiae, Mycoplasma bovis, Mycoplasma hyorhinis*
 ||Chlamydiaceae|*Chlamydia*|*Chlamydia spp.*
 ||Rickettsiaceae|*Orientia*|*Orientia tsutsugamushi*
-
+|Other|||
+||||*Anaplasma aphagocytophilum*
+||||*Peptoclostridium difficile*
+||||*Carnobacterium maltaromaticum*
+||||*Cronobacter spp.*
+||||*Mannheimia haemolytica*
+||||*Melissococcus plutonius*
+||||*Ornithobacterium rhinotracheale*
+||||*Paenibacillus larvae*
+||||*Pediococcus pentosaceus*
+||||*Riemerella anatipestifer*
+||||*Sinorhizobium spp.*
+||||*Taylorella spp.*
+||||*Tenacibaculum spp.*
+||||*Wolbachia spp.*
+||||*Xylella fastidiosa*
 
 ## Species codes and default housekeeping genes
 Codes in ccne|Species|Default housekeeping genes
@@ -289,7 +304,7 @@ Str|*Streptomyces spp.*|*atpD*
 Sub|*Streptococcus uberis*|*arcC*
 Seq|*Streptococcus equi*|*arcC*
 Tay|*Taylorella spp.*|*adk*
-Ten|*Tenacibaculum*|*atpA*
+Ten|*Tenacibaculum spp.*|*atpA*
 Vch|*Vibrio cholerae*|*adk*
 Vib|*Vibrio spp.*|*atpA*
 Vpa|*Vibrio parahaemolyticus*|*dnaE*
