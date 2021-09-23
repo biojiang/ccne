@@ -133,21 +133,21 @@ Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/mast
 ## Supported species
 |Class|Group/Family|Genus|Species
 |:---|:---|:---|:---
-|Aerobic gram-positive cocci|||
+|Aerobic Gram-positive cocci|||
 ||Staphlococcaceae|*Staphylococcus*|*Staphylococcus aureus, Staphylococcus epidermidis, Staphylococcus haemolyticus, Stapylococcus hominis, Staphylococcus lugdunensis, Staphylococcus pseudintermedius*
 ||Streptococcaceae|*Streptococcus*|*Streptococcus agalactiae, Streptococcus canis, Streptococcus dysgalactiae, Streptococcus gallolyticus, Streptococcus oralis, Streptococcus pneumoniae, Streptococcus pyogenes, Streptococcus suis, Streptococcus thermophilus, Streptococcus uberis, Streptococcus equi*
 ||Enterococcaceae|*Enterococcus*|*Enterococcus faecalis, Enterococcus faecium*
-|Aerobic gram-positive bacillus|||
+|Aerobic Gram-positive bacillus|||
 ||Listeriaceae|*Listeria*|*Listeria monocytogenes*
 ||Lactobacillaceae|*Lactobacillus*|*Lactobacillus salivarius*
 ||Bacillaceae|*Bacillus*|*Bacillus cereus, Bacillus licheniformis, Bacillus subtilis*
 ||Corynebacteriaceae|*Corynebacterium*|*Corynebacterium diphtheriae*
 ||Streptomycetaceae|*Streptomyces*|*Streptomyces spp.*
 ||Mycobacteriaceae|*Mycobacterium*|*Mycobacterium abscessus, Mycobacterium massiliense*
-|Aerobic gram-negative cocci|||
+|Aerobic Gram-negative cocci|||
 ||Neisseriaceae|*Neisseria*|*Neisseria spp.*
 ||Moraxellaceae|*Moraxella*|*Moraxella catarrhalis*
-|Aerobic gram-negative bacillus|||
+|Aerobic Gram-negative bacillus|||
 ||Enterobacteriaceae|*Escherichia*|*Escherichia spp.*
 |||*Shigella*|*Shigella spp.*
 |||*Salmonella*|*Salmonella enterica*
@@ -158,27 +158,27 @@ Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/mast
 |||*Serratia*|*Serratia marcescens*
 |||*Proteus*|*Proteus mirabilis*
 |||*Edwardsiella*|*Edwardsiella tarda*
-|Aerobic gram-negative bacillus (Non-Enterobacteriaceae)|||
+|Aerobic Gram-negative bacillus (Non-Enterobacteriaceae)|||
 ||Aeromonadaceae|*Aeromonas*|*Aeromonas spp.*
 ||Vibrionaceae|*Vibrio*|*Vibrio cholerae, Vibrio spp., Vibrio parahaemolyticus, Vibrio tapetis, Vibrio vulnificus*
-|Aerobic gram-negative bacillus (Sugar unfermented)|||
+|Aerobic Gram-negative bacillus (Sugar unfermented)|||
 ||Pseudomonadaceae|*Pseudomonae*|*Pseudomonas aeruginosa, Pseudomonas fluorescens*
 ||Moraxellaceae|*Acinetobacter*|*Acinetobacter baumannii*
 ||Flavobacteriaceae|*Flavobacterium*|*Flavobacterium psychrophilum*
 ||Burkholderiaceae|*Burkholderia*|*Burkholderia cepacia, Burkholderia pseudomallei*
 ||Xanthomonadaceae|*Stenotrophomonas*|*Stenotrophomonas maltophilia*
 ||Alcaligenaceae|*Achromobacter*|*Achromobacter spp.*
-|Other aerobic gram-negative bacteria|||
+|Other aerobic Gram-negative bacteria|||
 ||Pasteurellaceae|*Hemophilus*|*Haemophilus influenzae, Haemophilus parasuis, Haematopinus suis*
 ||Neisseriaceae|*Kingella*|*Kingella kingae*
 ||Alcaligenaceae|*Bordetella*|*Bordetella pertussis*
 ||Pasteurellaceae|*Pasteurella*|*Pasteurella multocida*
 ||Bartonellaceae|*Bartonella*|*Bartonella henselae*
-|Anaerobic gram-positive bacillus (Non-Spore-Forming)|||
+|Anaerobic Gram-positive bacillus (Non-Spore-Forming)|||
 ||Propionibacteriaceae|*Propionibacterium*|*Propionibacterium acnes* 
-|Anaerobic gram-positive bacillus (Spore-Forming)|||
+|Anaerobic Gram-positive bacillus (Spore-Forming)|||
 ||Clostridiaceae|*Clostridium*|*Clostridium botulinum, Clostridium difficile, Clostridium septicum*
-|Anaerobic gram-negativ bacillus|||
+|Anaerobic Gram-negativ bacillus|||
 ||Porphyromonasaceae|*Porphyromonas*|*Porphyromonas gingivalis*
 |Gram-negative Campylobacter and Helicobacter|||
 ||Campylobacteraceae|*Campylobacter*|*Campylobacter coli, Campylobacter jejuni, Campylobacter concisus, Campylobacter fetus, Campylobacter helveticus, Campylobacter hyointestinalis, Campylobacter insulaenigrae, Campylobacter lanienae, Campylobacter lari, Campylobacter sputorum, Campylobacter upsaliensis*
