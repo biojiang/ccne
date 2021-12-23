@@ -2,8 +2,9 @@
 # Introduction
 **C**arbapenemase-encoding gene **C**opy **N**umber **E**stimator (ccne) is a tool to estimate the copy number of AMR genes. It uses housekeeping gene as the reference and compares the count of reads that mapped to AMR genes with the count of reads that mapped to the reference gene. 
 # Quick start
+## ccne-fast
 ```
-$ ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
+$ ccne-fast --amr KPC-2 --sp Kpn --in File.list --out result.txt --cpus 4
 All finished! Enjoy!
 
 $ ls
@@ -13,8 +14,23 @@ $ head File.list
 SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 
 $ head result.txt
-ID	rpoB reads depth  SD of rpoB reads depth  KPC-2 reads depth SD of KPC-2 reads depth Ratio Estimated KPC-2 copy number
-SRR14561347 766.040208488459  64.5952660470369  2418.11451247166  112.252829680359  3.15664176067605  3
+ID      rpoB reads depth        SD of rpoB reads depth  KPC-2 reads depth       SD of KPC-2 reads depth Estimated KPC-2 copy number
+SRR14561347     653.944899478779        53.7865295303472        2006.6179138322 96.5807513871426        3.06848163420428
+```
+## ccne-acc
+```
+$ ccne-acc --amr KPC-2 --in File.list --out result.txt --cpus 4
+All finished! Enjoy!
+
+$ ls
+File.list result.txt SRR14561347_1.fastq.gz SRR14561347_2.fastq.gz  SRR14561347.fasta
+
+$ head File.list
+SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz  SRR14561347.fasta
+
+$ head result.txt
+ID      Average reference reads depth   KPC-2 reads depth       Estimated KPC-2 copy number
+SRR14561347     570     2127    3.73157894736842
 ```
 # Installation
 ## Source
@@ -35,13 +51,14 @@ Check dependencies:<br/>
 The ccne will check the dependencies automatically each time before running.
 
 # Usage
+## ccne-fast
 ```
 Name:
-  Ccne 1.0.0 by Jianping Jiang <jiangjianping@fudan.edu.cn>
+  ccne-fast 1.1.0 by Jianping Jiang <jiangjianping@fudan.edu.cn>
 Synopsis:
   Carbapenemase-encoding gene copy number estimator
 Usage:
-  ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
+  ccne-fast --amr KPC-2 --sp Kpn --in File.list --out result.txt
 General:
   --help             This help
   --version          Print version and exit
@@ -64,14 +81,45 @@ Computation:
   --multiref         Use the reads depth of all the available sequences (default OFF)
 
 ```
+## ccne-acc
+```
+Name:
+  ccne-acc 1.1.0 by Jianping Jiang <jiangjianping@fudan.edu.cn>
+Synopsis:
+  Carbapenemase-encoding gene copy number estimator
+Usage:
+  ccne-acc --amr KPC-2 --in File.list --out result.txt
+General:
+  --help             This help
+  --version          Print version and exit
+  --quiet            No screen output (default OFF)
+Setup:
+  --dbdir [X]        CCNE database root folders (default '$CCNE_bin/db')
+  --listdb           List all configured AMRs
+  --fmtdb            Format all the bwa index
+Input:
+  --amr [X]          AMR gene name, such as KPC-2, NDM-1, etc or AMR ID. Please refer to --listdb (required)
+  --in [X]           Input file name (required)
+Outputs:
+  --out [X]          Output file name (required)
+Computation:
+  --cpus [N]         Number of CPUs to use (default '1')
+
+```
 # Running
 ## Input Requirements
+### ccne-fast
 * Sequence read file(s) in FASTQ format (can be .gz compressed) format
 * AMR gene name (refer to --listdb)
 * The species code ( refer to --listsp or species code table)
+### ccne-acc
+* Sequence read file(s) in FASTQ format (can be .gz compressed) format
+* AMR gene name (refer to --listdb)
+* The genome assembly
 ## Output File
 The ccne will output the result to the file with the name the user provided.
 ## Columns in the output file
+### ccne-fast
 Name|Description
 |:---|:--
 |ID|The sample ID user provided in the input file
@@ -79,8 +127,14 @@ Name|Description
 |SD of rpoB reads coverage|The standard deviation of rpoB reads coverage
 |KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
 |SD of KPC-2 reads coverage|The standard deviation of KPC-2 reads coverage
-|Ratio|Divide the reads coverage of AMR gene into that of housekeeping gene
-|Estimated KPC-2 copy number|Rounding of ratio
+|Estimated KPC-2 copy number|Divide the reads coverage of AMR gene into that of housekeeping gene
+### ccne-acc
+Name|Description
+|:---|:--
+|ID|The sample ID user provided in the input file
+|Average reads coverage|The estimated reads coverage of the genome
+|KPC-2 reads coverage|The estimated reads coverage of the input carbapenemase-encoding gene
+|Estimated KPC-2 copy number|Divide the reads coverage of AMR gene into that of housekeeping gene
 ## Tutorial
 1. Fetch the reads files (SRR14561347) in fastq format from NCBI SRA database. (SRR14561347 generated from a *Klebsiella pneumoinae* clinical isolate with triple KPC-2 encoding genes on the plasmid)
 ```
@@ -102,8 +156,8 @@ $ ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
 5. Check the result.
 ```
 $ head result.txt
-ID	rpoB reads depth  SD of rpoB reads depth  KPC-2 reads depth SD of KPC-2 reads depth Ratio Estimated KPC-2 copy number
-SRR14561347 766.040208488459  64.5952660470369  2418.11451247166  112.252829680359  3.15664176067605  3
+ID      rpoB reads depth        SD of rpoB reads depth  KPC-2 reads depth       SD of KPC-2 reads depth Estimated KPC-2 copy number
+SRR14561347     653.944899478779        53.7865295303472        2006.6179138322 96.5807513871426        3.06848163420428
 ```
 ## AMR genes (2412 genes) in ccne
 |Antimicrobial agents|Subtypes|Gene or protein names1
@@ -130,7 +184,7 @@ SRR14561347 766.040208488459  64.5952660470369  2418.11451247166  112.2528296803
 1Numbers in the last brackets are the number of alleles.
 Details refer to [CARD AMR genes](https://github.com/katholt/Kleborate/blob/master/kleborate/data/CARD_AMR_clustered.csv) in Kleborate.
 
-## Supported species
+## Supported species in ccne-fast
 |Class|Group/Family|Genus|Species
 |:---|:---|:---|:---
 |Aerobic Gram-positive cocci|||
