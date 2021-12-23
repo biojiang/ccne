@@ -355,7 +355,7 @@ Used for getting bed files</br>
 *Ramírez, Fidel, Devon P. Ryan, et al., 2016, deepTools2: A next Generation Web Server for Deep-Sequencing Data Analysis, Nucleic Acids Research.* [PMID:[27079975](https://pubmed.ncbi.nlm.nih.gov/27079975)]
 * **blast**</br>
 Used for finding AMR gene on the genome</br>
-*Camacho C., Coulouris G., et al., 2008, BLAST+: architecture and applications, BMC Bioinformatics, 0:42. * [PMID:[20003500](https://pubmed.ncbi.nlm.nih.gov/20003500)]
+*Camacho C., Coulouris G., et al., 2008, BLAST+: architecture and applications, BMC Bioinformatics, 0:42.* [PMID:[20003500](https://pubmed.ncbi.nlm.nih.gov/20003500)]
 
 # Test environment
 Ubuntu 16.04 LTS with perl v5.26.2 (Theoretically compatible with other generic Linux version but not tested)
