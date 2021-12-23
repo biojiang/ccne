@@ -1,0 +1,717 @@
+#!/usr/bin/perl -w
+
+#    ccne - Carbapenemase-encoding gene copy number estimator
+#
+#    Copyright (C) 2021- Jianping Jiang
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use strict;
+use warnings;
+use File::Copy;
+use File::Basename;
+use Time::Piece;
+use Time::Seconds;
+use Scalar::Util qw(openhandle);
+use FindBin;
+use Cwd qw(abs_path);
+use Math::CDF qw(:all);
+
+# global variables
+my $OPSYS = $^O;
+my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
+my $EXE = $FindBin::RealScript;
+my $VERSION = "1.1.0";
+my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
+my (@Options,@LOG,$quiet,$multiref,$dbdir,$AMR_Gene,$confdir,%info_amr,$input,$output,$threads);
+$dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
+$confdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../config");
+
+&add_bundle_to_path();
+&loadconf();
+# table of tools needed and min versions
+my $BIDEC = '(\d+\.\d+)';  # pattern of NN.NN for versions that can be compared
+my %tools = (
+  'bwa' => {
+    GETVER  => "bwa 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "0.7",
+    NEEDED  => 1,
+  },
+  'samtools' => {
+    GETVER  => "samtools 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.9",
+    NEEDED  => 1,
+  },
+  'bedtools' => {
+    GETVER  => "bedtools 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "2.29",
+    NEEDED  => 1,
+  },
+  'hts_SuperDeduper' => {
+    GETVER  => "hts_SuperDeduper 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'hts_AdapterTrimmer' => {
+    GETVER  => "hts_AdapterTrimmer 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'hts_SeqScreener' => {
+    GETVER  => "hts_SeqScreener 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'hts_PolyATTrim' => {
+    GETVER  => "hts_PolyATTrim 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'computeGCBias' => {
+    GETVER  => "computeGCBias --version 2>&1| grep -E 'computeGCBias .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "3.3",
+    NEEDED  => 1,
+  },
+  'correctGCBias' => {
+    GETVER  => "correctGCBias --version 2>&1| grep -E 'correctGCBias .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "3.3",
+    NEEDED  => 1,
+  },
+  'makeblastdb' => {
+    GETVER  => "makeblastdb -version 2>&1| grep -E 'makeblastdb: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "2.7",
+    NEEDED  => 1,
+  },
+  'blastn' => {
+    GETVER  => "blastn -version 2>&1| grep -E 'blastn: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "2.7",
+    NEEDED  => 1,
+  },
+  'faToTwoBit' => {
+    NEEDED  => 1,
+  }
+
+
+);
+# functions to check if tool is installed and correct version
+
+
+sub ver2str {
+  my($bidec) = @_;
+  return $bidec if $bidec !~ m/\./;
+  return join '', map { sprintf "%03d",$_ } (split m/\./, $bidec);
+}
+
+sub check_tool {
+  my($toolname) = @_;
+  my $t = $tools{$toolname};
+  my $fp = &find_exe($toolname);
+  &msg("Can't find required '$toolname' in your \$PATH") if !$fp and $t->{NEEDED};
+  if ($fp) {
+    $t->{HAVE} = $fp;
+    &msg("Looking for '$toolname' - found $fp");
+    if ($t->{GETVER}) {
+      my($s) = qx($t->{GETVER});
+      if (defined $s) {
+        chomp $s;
+        $s =~ $t->{REGEXP} or &err("Coult not parse version from '$s'");;
+        $t->{VERSION} = &ver2str($1);
+        &msg("Determined $toolname version is $t->{VERSION} from '$s'");
+        if (defined $t->{MINVER} and $t->{VERSION} lt &ver2str($t->{MINVER}) ) {
+          &err("CCNE needs $toolname $t->{MINVER} or higher. Please upgrade and try again.");
+        }
+      }
+      else {
+        &err("Could not determine version of $toolname - please install version",
+            $t->{MINVER}, "or higher");
+      }
+    }
+  }
+}
+
+sub check_all_tools {
+  for my $toolname (sort keys %tools) {
+    &check_tool($toolname);
+  }
+}
+&msg("Check for dependent tools");
+&check_all_tools();
+&setOptions();
+
+my $othreads = int($threads/2);
+if($othreads == 0)
+{
+	$othreads = 1;
+}
+my $AMR_index = "$dbdir/AMR/$info_amr{$AMR_Gene}{'id'}.fasta";
+
+if(not -e $AMR_index)
+{
+	&err("$info_amr{$AMR_Gene}{'name'} index file not found!");
+}
+open IN,"<$input";
+open RES,">$output";
+print RES "ID\tAverage reference reads depth\t$info_amr{$AMR_Gene}{'name'} reads depth\tEstimated $info_amr{$AMR_Gene}{'name'} copy number\n";
+
+while(my $line = <IN>)
+{
+	chomp $line;
+	my @ele = split/\t/,$line;
+	my $name = $ele[0];
+	my $tmp_dir = "$name"."_tmp";
+	my $combine_ctg = "$name.combined.fasta";
+	my $exclued_bed = "$name.exclued.bed";
+	my $ori_bed = "$name.ori.bed";
+	my $rename_ctg = "$name.rename.fasta";
+	my $raw_bam = "$name.raw.bam";
+	my $gc_freq = "$name.freq.txt";
+	my $bit_file = "$name.2bit";
+	my $correct_bam = "$name.gc_corrected.bam";
+	my $corrected_bed = "$name.gc_corrected.bed";
+	my $amr_bed = "$name.amr.bed";
+	mkdir($tmp_dir);
+	if(not -e $ele[-1])
+	{
+		&err("Genome assembly $ele[-1] not found!");
+	}
+	&combineCtg($ele[-1],$name,$tmp_dir,$combine_ctg,$exclued_bed,$ori_bed,$rename_ctg);
+	my $amr_status = &getAMRBed("$tmp_dir/$rename_ctg",$AMR_index,"$tmp_dir/$amr_bed");
+	system("faToTwoBit $tmp_dir/$combine_ctg $tmp_dir/$bit_file");
+	open ORI,"<$tmp_dir/$ori_bed";
+        my $eff_len = 0;
+        my $frag = 0;
+	my $l = 300;
+        while(my $line2 = <ORI>)
+        {
+                chomp $line2;
+                my @arr = split/\t/,$line2;
+                $eff_len += $arr[2] - $arr[1] + 1;
+                $frag ++;
+        }
+	close ORI;
+        $eff_len -= $frag * $l;
+	
+	my $reads1 = '';
+	my $reads2 = '';
+	if($#ele == 2)
+	{
+		$reads1 = $ele[1];
+		if(-e $reads1)
+		{
+			my $prefix = &readQC("$tmp_dir/$name",$reads1);
+			$reads1 = $prefix.'_SE.fastq.gz';
+			&msg("Reads mapping");
+			system("bwa mem $tmp_dir/$combine_ctg $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - |samtools sort --threads $othreads - > $tmp_dir/$raw_bam");
+			system("samtools index $tmp_dir/$raw_bam");
+			&msg("GC bias correction");
+			system("computeGCBias -b $tmp_dir/$raw_bam --effectiveGenomeSize $eff_len -g $tmp_dir/$bit_file --GCbiasFrequenciesFile $tmp_dir/$gc_freq -bl $tmp_dir/$exclued_bed -p $threads --fragmentLength 150");
+			system("correctGCBias -b $tmp_dir/$raw_bam --effectiveGenomeSize $eff_len -g $tmp_dir/$bit_file --GCbiasFrequenciesFile $tmp_dir/$gc_freq -p $threads -o $tmp_dir/$correct_bam");
+			my $bed = `bedtools genomecov -ibam $tmp_dir/$correct_bam -d`;
+			my @lines = split/\n/,$bed;
+			open ORI,"<$tmp_dir/$ori_bed";
+			open BED,">$tmp_dir/$corrected_bed";
+			while(my $line3 = <ORI>)
+        		{
+                		chomp $line3;
+                		my @arr2 = split/\t/,$line3;
+                		my $index = 1;
+                		for my $sl(@lines[$arr2[1]..$arr2[2]])
+                		{
+                        		my @tmp = split/\t/,$sl;
+                        		$tmp[0] = $arr2[0];
+                        		$tmp[1] = $index;
+                        		print BED join("\t",@tmp),"\n";
+                        		$index++;
+                		}
+        		}
+			close ORI;
+			close BED;
+			
+		}
+		else
+		{
+			 &err("$reads1 not found!");
+		}
+	}
+	elsif($#ele == 3)
+	{
+		$reads1 = $ele[1];
+		$reads2 =  $ele[2];
+		if(-e $reads1 and -e $reads2)
+		{
+			my $prefix = &readQC("$tmp_dir/$name",$reads1,$reads2);
+			$reads1 = $prefix.'_R1.fastq.gz';
+			$reads2 = $prefix.'_R2.fastq.gz';
+			&msg("Reads mapping");
+                        system("bwa mem $tmp_dir/$combine_ctg $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - |samtools sort --threads $othreads - > $tmp_dir/$raw_bam");
+                        system("samtools index $tmp_dir/$raw_bam");
+			&msg("GC bias correction");
+                        system("computeGCBias -b $tmp_dir/$raw_bam --effectiveGenomeSize $eff_len -g $tmp_dir/$bit_file --GCbiasFrequenciesFile $tmp_dir/$gc_freq -bl $tmp_dir/$exclued_bed -p $threads");
+                        system("correctGCBias -b $tmp_dir/$raw_bam --effectiveGenomeSize $eff_len -g $tmp_dir/$bit_file --GCbiasFrequenciesFile $tmp_dir/$gc_freq -p $threads -o $tmp_dir/$correct_bam");
+                        my $bed = `bedtools genomecov -ibam $tmp_dir/$correct_bam -d`;
+                        my @lines = split/\n/,$bed;
+                        open ORI,"<$tmp_dir/$ori_bed";
+                        open BED,">$tmp_dir/$corrected_bed";
+                        while(my $line3 = <ORI>)
+                        {
+                                chomp $line3;
+                                my @arr2 = split/\t/,$line3;
+                                my $index = 1;
+                                for my $sl(@lines[$arr2[1]..$arr2[2]])
+                                {
+                                        my @tmp = split/\t/,$sl;
+                                        $tmp[0] = $arr2[0];
+                                        $tmp[1] = $index;
+                                        print BED join("\t",@tmp),"\n";
+                                        $index++;
+                                }
+                        }
+                        close ORI;
+                        close BED;
+		}
+		else
+		{
+			 &err("$reads1 or $reads2 not found!");
+		}
+
+		
+	}
+	else
+	{
+		&err("Input file format error!");
+	}
+	my ($amr_depth,$ctg_depth) = &calDepth("$tmp_dir/$corrected_bed","$tmp_dir/$amr_bed");
+	print RES $name,"\t",$ctg_depth,"\t",$amr_depth,"\t",$amr_depth/$ctg_depth,"\n";
+	&msg("Remove tmp files");
+	if($reads2 ne '')
+	{
+		system("rm $reads1 $reads2");
+	}
+	else
+	{
+		system("rm $reads1");
+	}
+	system("rm -r $tmp_dir");
+	&msg("$name finished!");
+}
+&msg("All finished! Enjoy!");
+
+#------------------------------------------------
+sub find_exe {
+  my($bin) = shift;
+  for my $dir (File::Spec->path) {
+    my $exe = File::Spec->catfile($dir, $bin);
+    return $exe if -x $exe;
+  }
+  return;
+}
+#------------------------------------------------
+sub msg {
+  my $t = localtime;
+  my $line = "[".$t->hms."] @_\n";
+  print STDERR $line unless $quiet;
+  if (openhandle(\*LOG)) {
+    # write out any buffered log lines
+    if (@LOG) {
+      print LOG @LOG;
+      @LOG=();
+    }
+    # write out the current log line
+    print LOG $line;
+  }
+  else {
+    # buffer this log line for later
+    push @LOG, $line;
+  }
+}
+#----------------------------------------------------------------------
+
+sub err {
+  $quiet=0;
+  msg(@_);
+  exit(2);
+}
+
+#----------------------------------------------------------------------
+# Option setting routines
+
+sub setOptions {
+  use Getopt::Long;
+  @Options = (
+    'General:',
+    {OPT=>"help",    VAR=>\&usage,             DESC=>"This help"},
+    {OPT=>"version", VAR=>\&version, DESC=>"Print version and exit"},
+    {OPT=>"quiet!",  VAR=>\$quiet, DEFAULT=>0, DESC=>"No screen output"},
+    'Setup:',
+    {OPT=>"dbdir=s",  VAR=>\$dbdir, DEFAULT=>$dbdir, DESC=>"CCNE database root folders"},
+    {OPT=>"listdb",   VAR=>\&list_db,  DESC=>"List all configured AMRs"},
+    {OPT=>"fmtdb",   VAR=>\&fmtdb,  DESC=>"Format all the bwa index"},
+    'Input:',
+    {OPT=>"amr=s",  VAR=>\$AMR_Gene,  DESC=>"AMR gene name, such as KPC-2, NDM-1, etc or AMR ID. Please refer to --listdb (required)"},
+    {OPT=>"in=s",  VAR=>\$input, DESC=>"Input file name (required)"},
+    'Outputs:',
+    {OPT=>"out=s",  VAR=>\$output, DESC=>"Output file name (required)"},
+    'Computation:',
+    {OPT=>"cpus=i",  VAR=>\$threads, DEFAULT=>1, DESC=>"Number of CPUs to use"},
+  );
+(!@ARGV) && (usage(1));
+
+  &GetOptions(map {$_->{OPT}, $_->{VAR}} grep { ref } @Options) || usage(1);
+  #Check required values
+  if(not defined $AMR_Gene){
+    &err("--amr required");
+  }
+  if(not defined $input){
+    &err("--in required");
+  }
+  if(not defined $output){
+    &err("--out required");
+  }
+
+  # Now setup default values.
+  foreach (@Options) {
+    if (ref $_ && defined($_->{DEFAULT}) && !defined(${$_->{VAR}})) {
+      ${$_->{VAR}} = $_->{DEFAULT};
+    }
+  }
+}
+
+
+sub usage {
+  my($exitcode) = @_;
+  $exitcode ||= 0;
+  $exitcode = 0 if $exitcode eq 'help';  # what gets passed by getopt func ref
+  select STDERR if $exitcode;            # write to STDERR if exitcode is error
+
+  print
+    "Name:\n  ", $EXE, " $VERSION by $AUTHOR\n",
+    "Synopsis:\n  Carbapenemase-encoding gene copy number estimator (accurate estimator)\n",
+    "Usage:\n  $EXE --amr KPC-2 --in File.list --out result.txt\n";
+  foreach (@Options) {
+    if (ref) {
+      my $def = defined($_->{DEFAULT}) ? " (default '$_->{DEFAULT}')" : "";
+      $def = ($def ? ' (default OFF)' : '(default ON)') if $_->{OPT} =~ m/!$/;
+      my $opt = $_->{OPT};
+      $opt =~ s/!$//;
+      $opt =~ s/=s$/ [X]/;
+      $opt =~ s/=i$/ [N]/;
+      $opt =~ s/=f$/ [n.n]/;
+      printf STDERR "  --%-16s %s%s\n", $opt, $_->{DESC}, $def;
+    }
+    else {
+      print "$_\n"; # Subheadings in the help output
+    }
+  }
+  exit($exitcode);
+}
+
+#----------------------------------------------------------------------
+
+sub version {
+  print STDERR "$EXE $VERSION\n";
+  exit;
+}
+
+
+#----------------------------------------------------------------------
+sub list_db{
+  my @files = glob "$dbdir/AMR/*.fasta";
+  my %out = ();
+  map{$_ =~ /\/AMR\/(.+)\.fasta/;if(exists $out{$info_amr{$1}{'class'}}){push @{$out{$info_amr{$1}{'class'}}},$info_amr{$1}{'name'}."[$info_amr{$1}{'id'}]";}else{@{$out{$info_amr{$1}{'class'}}}=($info_amr{$1}{'name'}."[$info_amr{$1}{'id'}]");}}@files;
+  print "Configured AMR genes[IDs]:\n";
+  for my $k(sort keys %out)
+  {
+	print $k,":\n";
+  	print join("|",sort @{$out{$k}}),"\n";
+  }
+  exit;
+}
+
+#----------------------------------------------------------------------
+sub fmtdb()
+{
+	my @amrs = glob "$dbdir/AMR/*.fasta";
+	map{system("bwa index $_");}@amrs;
+	exit;
+}
+#----------------------------------------------------------------------
+
+sub add_bundle_to_path {
+  for my $dir ($BINDIR, $FindBin::RealBin) {
+    if (-d $dir) {
+      &msg("Appending to PATH: $dir");
+      $ENV{PATH} .= ":$dir";
+    }
+  }
+}
+#----------------------------------------------------------------------
+
+sub loadconf()
+{
+	&msg("Loading configure infomation");
+	if(not -e "$confdir/CARD_AMR_clustered.csv")
+	{
+		&err("File CARD_AMR_clustered.csv not found in $confdir");
+	}
+	else
+	{
+		open CONF,"<$confdir/CARD_AMR_clustered.csv";
+		<CONF>;
+		while(my $line = <CONF>)
+		{
+			chomp $line;
+			my @ele = split/\,/,$line;
+			$info_amr{$ele[1]}{'id'} = $ele[5];
+			$info_amr{$ele[1]}{'name'} = $ele[1];
+			$info_amr{$ele[5]}{'id'} = $ele[5];
+                        $info_amr{$ele[5]}{'name'} = $ele[1];
+			$info_amr{$ele[1]}{'class'} = $ele[2];
+                        $info_amr{$ele[5]}{'class'} = $ele[2];
+		}
+	}
+}
+#-----------------------------------------------------------------------
+
+sub combineCtg()
+{
+	&msg("Starting combine contigs");
+	my $seq_file = shift;
+	my $id = shift;
+	my $tmp_dir = shift;
+        my $combine_ctg = shift;
+        my $exclued_bed = shift;
+        my $ori_bed = shift;
+        my $rename_ctg = shift;
+	open SEQ,"<$seq_file";
+        local $/ = ">";
+        <SEQ>;
+        my $flank = 300;
+	my $pos = 0;
+        my $start = 0;
+        my $end = 0;
+	open COM,">$tmp_dir/$combine_ctg";
+	open BED,">$tmp_dir/$exclued_bed";
+        open ORI,">$tmp_dir/$ori_bed";
+        open REN,">$tmp_dir/$rename_ctg";
+        print COM ">$id\n";
+        my $index = 1;
+	while(my $line = <SEQ>)
+        {
+                my @arr = split/\n/,$line,2;
+                $arr[1] =~ s/\s|\r//g;
+                $arr[1] =~ s/>//g;
+                print COM $arr[1];
+                $pos += (length $arr[1])-1;
+                $end += (length $arr[1])-1;
+                print BED "$id\t",$pos-$flank,"\t",$pos+$flank,"\n";
+                print ORI "$id-$index\t",$start,"\t",$end,"\n";
+                print REN ">$id-$index\n";
+                print REN $arr[1],"\n";
+                $start = $end + 1;
+                $index ++;
+        }
+	close COM;
+	close BED;
+	close ORI;
+	close REN;
+	close SEQ;
+	system("bwa index $tmp_dir/$combine_ctg");
+	&msg("Combine contigs done");
+	
+}
+
+
+#-----------------------------------------------------------------------
+sub getAMRBed()
+{
+	my $ctg = shift;
+	my $amr = shift;
+	my $amr_bed = shift;
+	&msg("Starting get AMR gene position");
+	system("makeblastdb -in $ctg -dbtype nucl");
+	my $blast_res = `blastn -query $amr -db $ctg -evalue 1e-5 -num_threads $threads -outfmt 6 -max_target_seqs 1`;
+	my @res = split/\n/,$blast_res;
+	my @items = split/\t/,$res[0];
+        open OUT,">$amr_bed";
+        print OUT "$items[0]\t$items[1]\t",join("\t",sort{$a<=>$b}@items[8..9]),"\n";
+	close OUT;
+	open SEQ,"<$amr";
+	local $/ = <SEQ>;
+	<SEQ>;
+	my $amr_len = 0;
+	while(my $line = <SEQ>)
+	{
+		chomp $line;
+		my @seq = split/\n/.$line,2;
+		$seq[1] =~ s/>//g;
+		$seq[1] =~ s/\r|\s//g;
+		$amr_len = length $seq[1];
+	}
+	close SEQ;
+	if($items[4] != 0 or $items[5] != 0 or ($items[7]-$items[6]+1) != $amr_len)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+#-----------------------------------------------------------------------
+sub readQC
+{
+	&msg("Starting raw reads QC");
+	my $id = shift;
+	if(scalar @_ == 2)
+	{
+		system("hts_SuperDeduper -1 $_[0] -2 $_[1] | hts_AdapterTrimmer -p $threads | hts_SeqScreener |hts_PolyATTrim -f $id.clean");
+	}
+	else
+	{
+		system("hts_SuperDeduper -U $_[0] | hts_AdapterTrimmer -p $threads | hts_SeqScreener |hts_PolyATTrim -f $id.clean");
+	}
+	&msg("Raw reads QC done");
+	return $id.'.clean';
+}
+#-----------------------------------------------------------------------
+sub calDepth()
+{
+	my $ctg_bed = shift;
+	my $amr_bed = shift;
+	&msg("Starting stat ratio");
+	open AMR,"<$amr_bed";
+	my $amr_ctg = '';
+	my @amr_pos = ();
+
+	while(my $line = <AMR>)
+	{       
+        	chomp $line;
+        	my @arr = split/\t/,$line;
+        	$amr_ctg = $arr[1];
+        	@amr_pos = ($arr[2],$arr[3]);
+ 
+	}
+
+	my %depth = ();
+	my $ctg_size = 0;
+	my @amr_ctg_depth = ();
+	my %amr_depth = ();
+	my $amr_size = 0;
+	open CTG,"<$ctg_bed";
+	while(my $line = <CTG>)
+	{       
+        	chomp $line;
+        	my @arr = split/\t/,$line;
+        	if(exists $depth{$arr[-1]})
+        	{       
+                	$depth{$arr[-1]} ++;
+        	}
+        	else
+        	{       
+                	$depth{$arr[-1]} = 1;
+        	}
+        	if($arr[0] eq $amr_ctg)
+        	{       
+                	push @amr_ctg_depth,$arr[-1];
+        	}
+        	$ctg_size++;
+
+	}
+	map{if(exists $amr_depth{$_}){$amr_depth{$_}++;}else{$amr_depth{$_}=1;}$amr_size++;}@amr_ctg_depth;
+	my $ctg_mediam = &getMediam(\%depth,$ctg_size);
+	my $amr_mediam = &getMediam(\%amr_depth,$amr_size);
+	return ($amr_mediam,$ctg_mediam);
+}
+
+#-----------------------------------------------------------------------
+sub getMediam()
+{
+        my $dat = shift;
+        my $size = shift;
+        my %hash = %{$dat};
+        my $total = 0;
+        my $out = 0;
+        for my $k(sort{$a<=>$b}keys %hash)
+        {
+                $total += $hash{$k};
+                if($total >= int($size/2))
+                {
+                        $out = $k;
+                        last;
+                }
+        }
+        return $out;
+}
+#-----------------------------------------------------------------------
+sub AMRExtend()
+{
+        my $depth = shift;
+        my @depth_arr = @{$depth};
+        my $pos = shift;
+        my $lamda = 0;
+        map{$lamda += $_;}@depth_arr[$pos->[0]-1..$pos->[1]-1];
+        $lamda = $lamda/($pos->[1]-$pos->[0]+1);
+        my $p = 0.001;
+        my $l = 10;
+        my $val = 0;
+        my $up = $pos->[0]-1;
+        my $down = $pos->[1]-1;
+        while($up > 0 && $val <= $l)
+        {
+                if(ppois($depth_arr[$up],$lamda) < $p)
+                {
+
+                        $val ++;
+                }
+                else
+                {
+                        $val = 0;
+                }
+                $up--;
+        }
+        $val = 0;
+        while($down < $#depth_arr && $val <= $l)
+        {
+                if(ppois($depth_arr[$down],$lamda) < $p)
+                {
+
+                        $val ++;
+                }
+                else
+                {
+                        $val = 0;
+                }
+                $down++;;
+        }
+ 	
+	return ($up,$down);
+
+
+}
+
+
+
+

@@ -1,0 +1,570 @@
+#!/usr/bin/perl -w
+
+#    ccne - Carbapenemase-encoding gene copy number estimator
+#
+#    Copyright (C) 2021- Jianping Jiang
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use strict;
+use warnings;
+use File::Copy;
+use File::Basename;
+use Time::Piece;
+use Time::Seconds;
+use Scalar::Util qw(openhandle);
+use FindBin;
+use Cwd qw(abs_path);
+
+
+# global variables
+my $OPSYS = $^O;
+my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
+my $EXE = $FindBin::RealScript;
+my $VERSION = "1.1.0";
+my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
+my (@Options,@LOG,$quiet,$multiref,$dbdir,$AMR_Gene, $confdir,%info_sp,%info_amr,$SP, $Housekeeping_gene,$input,$output,$threads,$fl);
+$dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
+$confdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../config");
+my $cutoff = 0.01;
+my $cutoff_up = 0.5;
+&add_bundle_to_path();
+&loadconf();
+# table of tools needed and min versions
+my $BIDEC = '(\d+\.\d+)';  # pattern of NN.NN for versions that can be compared
+my %tools = (
+  'bwa' => {
+    GETVER  => "bwa 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "0.7",
+    NEEDED  => 1,
+  },
+  'samtools' => {
+    GETVER  => "samtools 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.9",
+    NEEDED  => 1,
+  },
+  'bedtools' => {
+    GETVER  => "bedtools 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "2.29",
+    NEEDED  => 1,
+  },
+  'hts_SuperDeduper' => {
+    GETVER  => "hts_SuperDeduper 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'hts_AdapterTrimmer' => {
+    GETVER  => "hts_AdapterTrimmer 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'hts_SeqScreener' => {
+    GETVER  => "hts_SeqScreener 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  },
+  'hts_PolyATTrim' => {
+    GETVER  => "hts_PolyATTrim 2>&1| grep -E 'Version: .+\$'",
+    REGEXP  => qr/($BIDEC)/,
+    MINVER  => "1.3",
+    NEEDED  => 1,
+  }
+
+
+);
+# functions to check if tool is installed and correct version
+
+
+sub ver2str {
+  my($bidec) = @_;
+  return $bidec if $bidec !~ m/\./;
+  return join '', map { sprintf "%03d",$_ } (split m/\./, $bidec);
+}
+
+sub check_tool {
+  my($toolname) = @_;
+  my $t = $tools{$toolname};
+  my $fp = &find_exe($toolname);
+  &msg("Can't find required '$toolname' in your \$PATH") if !$fp and $t->{NEEDED};
+  if ($fp) {
+    $t->{HAVE} = $fp;
+    &msg("Looking for '$toolname' - found $fp");
+    if ($t->{GETVER}) {
+      my($s) = qx($t->{GETVER});
+      if (defined $s) {
+        chomp $s;
+        $s =~ $t->{REGEXP} or &err("Coult not parse version from '$s'");;
+        $t->{VERSION} = &ver2str($1);
+        &msg("Determined $toolname version is $t->{VERSION} from '$s'");
+        if (defined $t->{MINVER} and $t->{VERSION} lt &ver2str($t->{MINVER}) ) {
+          &err("CCNE needs $toolname $t->{MINVER} or higher. Please upgrade and try again.");
+        }
+      }
+      else {
+        &err("Could not determine version of $toolname - please install version",
+            $t->{MINVER}, "or higher");
+      }
+    }
+  }
+}
+
+sub check_all_tools {
+  for my $toolname (sort keys %tools) {
+    &check_tool($toolname);
+  }
+}
+&msg("Check for dependent tools");
+&check_all_tools();
+&setOptions();
+if(not defined $Housekeeping_gene)
+{
+	if($SP eq "Pls"){&err("when --sp is set to Pls, --ref is required!")}
+	elsif(exists $info_sp{$SP})
+	{
+		$Housekeeping_gene = $info_sp{$SP}{'default'};
+	}
+	else{my $tmp = join("|", sort keys %info_sp);&err("--sp parameter error! Only $tmp allowed!")}
+}
+
+my @Housekeeping_index_set = ();
+if($multiref == 1)
+{
+	@Housekeeping_index_set = glob "$dbdir/Housekeeping/$SP".'_*.fasta';
+}
+else
+{
+	@Housekeeping_index_set = ("$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta');
+}
+my $othreads = int($threads/2);
+if($othreads == 0)
+{
+	$othreads = 1;
+}
+my $AMR_index = "$dbdir/AMR/$info_amr{$AMR_Gene}{'id'}.fasta";
+#my $Housekeeping_index = "$dbdir/Housekeeping/$SP".'_'.$Housekeeping_gene.'.fasta';
+if(not -e $AMR_index)
+{
+	&err("$info_amr{$AMR_Gene}{'name'} index file not found!");
+}
+for my $Housekeeping_index(@Housekeeping_index_set)
+{
+	if(not -e $Housekeeping_index)
+	{
+        	&err("$Housekeeping_index index file not found!");
+	}
+}
+open IN,"<$input";
+open OUT,">$output";
+if($multiref == 1)
+{
+	print OUT "ID\tAverage reference reads depth\t$info_amr{$AMR_Gene}{'name'} reads depth\tEstimated $info_amr{$AMR_Gene}{'name'} copy number\n";
+}
+else
+{
+	print OUT "ID\t$Housekeeping_gene reads depth\tSD of $Housekeeping_gene reads depth\t$info_amr{$AMR_Gene}{'name'} reads depth\tSD of $info_amr{$AMR_Gene}{'name'} reads depth\tEstimated $info_amr{$AMR_Gene}{'name'} copy number\n";
+}
+while(my $line = <IN>)
+{
+	chomp $line;
+	my @ele = split/\t/,$line;
+	my @cmd_carb = ();
+	my @cmd_hk = ();
+	my $name = $ele[0];
+	my $reads1 = '';
+	my $reads2 = '';
+	if($#ele == 1)
+	{
+		$reads1 = $ele[1];
+		if(-e $reads1)
+		{
+			my $prefix = &readQC($name,$reads1);
+			$reads1 = $prefix.'_SE.fastq.gz';
+			push @cmd_carb, "bwa mem $AMR_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - |bedtools genomecov -ibam - -dz";
+			for my $Housekeeping_index(@Housekeeping_index_set)
+			{
+				push @cmd_hk, "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
+			}
+		}
+		else
+		{
+			 &err("$reads1 not found!");
+		}
+	}
+	elsif($#ele == 2)
+	{
+		$reads1 = $ele[1];
+		$reads2 =  $ele[2];
+		if(-e $reads1 and -e $reads2)
+		{
+			my $prefix = &readQC($name,$reads1,$reads2);
+			$reads1 = $prefix.'_R1.fastq.gz';
+			$reads2 = $prefix.'_R2.fastq.gz';
+			
+			push @cmd_carb, "bwa mem $AMR_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
+			for my $Housekeeping_index(@Housekeeping_index_set)
+			{
+			 	push @cmd_hk,"bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
+			}
+		}
+		else
+		{
+			 &err("$reads1 or $reads2 not found!");
+		}
+	}
+	else
+	{
+		&err("Input file format error!");
+	}
+	my $carb_cn = 0;
+	my $total_carb = 0;
+	my $hk_cn = 0;
+	my $total_hk = 0;
+	my $carb_sd = 0;
+        my $hk_sd = 0;
+	for my $cmd(@cmd_carb)
+	{
+		&msg("Mapping to $info_amr{$AMR_Gene}{'name'}");
+		my $content_carb = `$cmd`;
+		$total_carb += &stat($content_carb,$fl);
+		if($multiref == 0)
+		{
+			$carb_sd = &sd($content_carb,$fl,$total_carb);
+		}
+	}
+	$carb_cn = $total_carb/(scalar @cmd_carb);
+	my $i = 0;
+	for my $cmd(@cmd_hk)
+	{
+		&msg("Mapping to $Housekeeping_index_set[$i]");
+		my $content_hk = `$cmd`;
+		$total_hk += &stat($content_hk,$fl);
+		if($multiref == 0)
+		{
+			$hk_sd = &sd($content_hk,$fl,$total_hk);
+		}
+		$i++;
+	}
+	$hk_cn = $total_hk/(scalar @cmd_hk);
+	my $ratio = $carb_cn/$hk_cn;
+	my $flag = 0;
+	if($multiref == 0)
+	{
+		print OUT $name,"\t",$hk_cn,"\t",$hk_sd,"\t",$carb_cn,"\t",$carb_sd,"\t",$ratio,"\n";
+	}
+	else
+	{
+		print OUT $name,"\t",$hk_cn,"\t",$carb_cn,"\t",$ratio,"\n";
+	}
+	if($reads2 ne '')
+	{
+		system("rm $reads1 $reads2");
+	}
+	else
+	{
+		system("rm $reads1");
+	}
+	&msg("$name finished!");
+}
+&msg("All finished! Enjoy!");
+
+sub stat()
+{
+        my $content = shift;
+	my $fl = shift;
+        my $sum = 0;
+        my $i = 0;
+        my @stat = ();
+        my @tmp = split/\n/,$content;
+	for my $line(@tmp)
+        {
+                chomp $line;
+                my @ele = split/\t/,$line;
+                push @stat,$ele[-1];
+        }
+        map{$sum+=$_;$i++;}@stat[$fl..$#stat-$fl];
+        return $sum/$i;
+	#return $stat[int(($#stat-$fl-$fl+1)/2)];
+}
+#-------------------------------------------------
+sub sd()
+{
+	my $content = shift;
+        my $fl = shift;
+	my $mean = shift;
+        my $sum = 0;
+        my $i = 0;
+        my @stat = ();
+        my @tmp = split/\n/,$content;
+        for my $line(@tmp)
+        {
+                chomp $line;
+                my @ele = split/\t/,$line;
+                push @stat,$ele[-1];
+        }
+        map{$sum+=($_-$mean)**2;$i++;}@stat[$fl..$#stat-$fl];
+        return sqrt($sum/$i);
+}
+#------------------------------------------------
+sub find_exe {
+  my($bin) = shift;
+  for my $dir (File::Spec->path) {
+    my $exe = File::Spec->catfile($dir, $bin);
+    return $exe if -x $exe;
+  }
+  return;
+}
+#------------------------------------------------
+sub msg {
+  my $t = localtime;
+  my $line = "[".$t->hms."] @_\n";
+  print STDERR $line unless $quiet;
+  if (openhandle(\*LOG)) {
+    # write out any buffered log lines
+    if (@LOG) {
+      print LOG @LOG;
+      @LOG=();
+    }
+    # write out the current log line
+    print LOG $line;
+  }
+  else {
+    # buffer this log line for later
+    push @LOG, $line;
+  }
+}
+#----------------------------------------------------------------------
+
+sub err {
+  $quiet=0;
+  msg(@_);
+  exit(2);
+}
+
+#----------------------------------------------------------------------
+# Option setting routines
+
+sub setOptions {
+  use Getopt::Long;
+  @Options = (
+    'General:',
+    {OPT=>"help",    VAR=>\&usage,             DESC=>"This help"},
+    {OPT=>"version", VAR=>\&version, DESC=>"Print version and exit"},
+    {OPT=>"quiet!",  VAR=>\$quiet, DEFAULT=>0, DESC=>"No screen output"},
+    'Setup:',
+    {OPT=>"dbdir=s",  VAR=>\$dbdir, DEFAULT=>$dbdir, DESC=>"CCNE database root folders"},
+    {OPT=>"listdb",   VAR=>\&list_db,  DESC=>"List all configured AMRs"},
+    {OPT=>"listsp",   VAR=>\&list_sp,  DESC=>"List all configured species and housekeeping genes"},
+    {OPT=>"fmtdb",   VAR=>\&fmtdb,  DESC=>"Format all the bwa index"},
+    'Input:',
+    {OPT=>"amr=s",  VAR=>\$AMR_Gene,  DESC=>"AMR gene name, such as KPC-2, NDM-1, etc or AMR ID. Please refer to --listdb (required)"},
+    {OPT=>"sp=s",  VAR=>\$SP,  DESC=>"Species name[Kp|Ec|Ab|Pa|Pls](required)"},
+    {OPT=>"ref=s",  VAR=>\$Housekeeping_gene,  DESC=>"Reference gene defalut(Kp:rpoB Ab:rpoB Ec:polB Pa:ppsA), please refer to --listsp.Note: When --sp is set to Pls, this parameter should be set to replicon type."},
+    {OPT=>"in=s",  VAR=>\$input, DESC=>"Input file name (required)"},
+    'Outputs:',
+    {OPT=>"out=s",  VAR=>\$output, DESC=>"Output file name (required)"},
+    'Computation:',
+    {OPT=>"flank=i",  VAR=>\$fl, DEFAULT=>0, DESC=>"The flanking length of sequence to be excluded"},
+    {OPT=>"cpus=i",  VAR=>\$threads, DEFAULT=>1, DESC=>"Number of CPUs to use"},
+    {OPT=>"multiref!",  VAR=>\$multiref, DEFAULT=>0, DESC=>"Use the reads depth of all the available sequences"},
+  );
+(!@ARGV) && (usage(1));
+
+  &GetOptions(map {$_->{OPT}, $_->{VAR}} grep { ref } @Options) || usage(1);
+  #Check required values
+  if(not defined $AMR_Gene){
+    &err("--amr required");
+  }
+  if(not defined $SP){
+    &err("--sp required");
+  }
+  if(not defined $input){
+    &err("--in required");
+  }
+  if(not defined $output){
+    &err("--out required");
+  }
+
+  # Now setup default values.
+  foreach (@Options) {
+    if (ref $_ && defined($_->{DEFAULT}) && !defined(${$_->{VAR}})) {
+      ${$_->{VAR}} = $_->{DEFAULT};
+    }
+  }
+}
+
+
+sub usage {
+  my($exitcode) = @_;
+  $exitcode ||= 0;
+  $exitcode = 0 if $exitcode eq 'help';  # what gets passed by getopt func ref
+  select STDERR if $exitcode;            # write to STDERR if exitcode is error
+
+  print
+    "Name:\n  ", ucfirst($EXE), " $VERSION by $AUTHOR\n",
+    "Synopsis:\n  Carbapenemase-encoding gene copy number estimator (fast screener)\n",
+    "Usage:\n  $EXE --amr KPC-2 --sp Kpn --in File.list --out result.txt\n";
+  foreach (@Options) {
+    if (ref) {
+      my $def = defined($_->{DEFAULT}) ? " (default '$_->{DEFAULT}')" : "";
+      $def = ($def ? ' (default OFF)' : '(default ON)') if $_->{OPT} =~ m/!$/;
+      my $opt = $_->{OPT};
+      $opt =~ s/!$//;
+      $opt =~ s/=s$/ [X]/;
+      $opt =~ s/=i$/ [N]/;
+      $opt =~ s/=f$/ [n.n]/;
+      printf STDERR "  --%-16s %s%s\n", $opt, $_->{DESC}, $def;
+    }
+    else {
+      print "$_\n"; # Subheadings in the help output
+    }
+  }
+  exit($exitcode);
+}
+
+#----------------------------------------------------------------------
+
+sub version {
+  print STDERR "$EXE $VERSION\n";
+  exit;
+}
+
+
+#----------------------------------------------------------------------
+sub list_db{
+  my @files = glob "$dbdir/AMR/*.fasta";
+  my %out = ();
+  map{$_ =~ /\/AMR\/(.+)\.fasta/;if(exists $out{$info_amr{$1}{'class'}}){push @{$out{$info_amr{$1}{'class'}}},$info_amr{$1}{'name'}."[$info_amr{$1}{'id'}]";}else{@{$out{$info_amr{$1}{'class'}}}=($info_amr{$1}{'name'}."[$info_amr{$1}{'id'}]");}}@files;
+  print "Configured AMR genes[IDs]:\n";
+  for my $k(sort keys %out)
+  {
+	print $k,":\n";
+  	print join("|",sort @{$out{$k}}),"\n";
+  }
+  exit;
+}
+
+#----------------------------------------------------------------------
+sub list_sp{
+  my @files = glob "$dbdir/Housekeeping/*.fasta";
+  my %out = ();
+  map{$_ =~ /\/Housekeeping\/(.+)\.fasta/;my @tmp = split/\_/,$1,2;if(exists $out{$tmp[0]}){push @{$out{$tmp[0]}},$tmp[1];}else{@{$out{$tmp[0]}} = ($tmp[1]);}}@files;
+  print "Configured species and housekeeping genes:\n";
+  for my $k(sort keys %out)
+  {
+	if($k eq 'Pls')
+	{
+		print $k,"(Plasmid replicon):",join("|",@{$out{$k}}),"\n";
+	}
+	else
+	{
+		map{if($_ eq $info_sp{$k}{'default'}){$_ = $_.'[default]'}}@{$out{$k}};
+        	print $k,"($info_sp{$k}{'name'})",":",join("|",@{$out{$k}}),"\n";
+	}
+
+  }
+  exit;
+}
+
+#----------------------------------------------------------------------
+sub fmtdb()
+{
+	my @amrs = glob "$dbdir/AMR/*.fasta";
+	my @hks = glob "$dbdir/Housekeeping/*.fasta";
+	map{system("bwa index $_");}@amrs;
+	map{system("bwa index $_");}@hks;
+	exit;
+}
+#----------------------------------------------------------------------
+
+sub add_bundle_to_path {
+  for my $dir ($BINDIR, $FindBin::RealBin) {
+    if (-d $dir) {
+      msg("Appending to PATH: $dir");
+      $ENV{PATH} .= ":$dir";
+    }
+  }
+}
+#----------------------------------------------------------------------
+
+sub loadconf()
+{
+	msg("Loading configure infomation");
+	if(not -e "$confdir/species_code.tab")
+	{
+		&err("File species_code.tab not found in $confdir");	
+	}
+	else
+	{
+		open CONF,"<$confdir/species_code.tab";
+		<CONF>;
+		while(my $line = <CONF>)
+		{
+			chomp $line;
+			my @ele = split/\t/,$line;
+			$info_sp{$ele[0]}{'name'} = $ele[1];
+			$info_sp{$ele[0]}{'default'} = $ele[2];
+		}
+	}
+	if(not -e "$confdir/CARD_AMR_clustered.csv")
+	{
+		&err("File CARD_AMR_clustered.csv not found in $confdir");
+	}
+	else
+	{
+		open CONF,"<$confdir/CARD_AMR_clustered.csv";
+		<CONF>;
+		while(my $line = <CONF>)
+		{
+			chomp $line;
+			my @ele = split/\,/,$line;
+			$info_amr{$ele[1]}{'id'} = $ele[5];
+			$info_amr{$ele[1]}{'name'} = $ele[1];
+			$info_amr{$ele[5]}{'id'} = $ele[5];
+                        $info_amr{$ele[5]}{'name'} = $ele[1];
+			$info_amr{$ele[1]}{'class'} = $ele[2];
+                        $info_amr{$ele[5]}{'class'} = $ele[2];
+		}
+	}
+}
+
+#-----------------------------------------------------------------------
+
+sub readQC
+{
+	&msg("Starting raw reads QC");
+	my $id = shift;
+	if(scalar @_ == 2)
+	{
+		system("hts_SuperDeduper -1 $_[0] -2 $_[1] | hts_AdapterTrimmer -p $threads | hts_SeqScreener |hts_PolyATTrim -f $id.clean");
+	}
+	else
+	{
+		system("hts_SuperDeduper -U $_[0] | hts_AdapterTrimmer -p $threads | hts_SeqScreener |hts_PolyATTrim -f $id.clean");
+	}
+
+	return $id.'.clean';
+}
+
+
+
+
+
+
+
