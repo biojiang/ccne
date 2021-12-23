@@ -350,7 +350,7 @@ Used for fetching mapped reads and sorting them by locus</br>
 * **bedtools**</br>
 Used for getting bed files</br>
 *Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2.* [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
-* **bedtools**</br>
+* **deepTools**</br>
 Used for getting bed files</br>
 *Ramírez, Fidel, Devon P. Ryan, et al., 2016, deepTools2: A next Generation Web Server for Deep-Sequencing Data Analysis, Nucleic Acids Research.* [PMID:[27079975](https://pubmed.ncbi.nlm.nih.gov/27079975)]
 * **blast**</br>
