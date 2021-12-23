@@ -337,15 +337,26 @@ Pmi|***Proteus mirabilis***|*rpoB*
    
 
 # Dependencies
+## ccne-fast & ccne-acc
+* **HTStream**</br>
+Used for raw reads QC</br>
+*Petersen, Kristen R., David A. Streett, et al., 2015, Super deduper, fast PCR duplicate detection in fastq files. In Proceedings of the 6th ACM Conference on Bioinformatics, Computational Biology and Health Informatics, pp. 491-492.* 
 * **bwa**</br>
 Used for reads mapping</br>
-*Li H. and Durbin R. (2009) Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics, 25:1754-1760.* [PMID: [19451168](http://www.ncbi.nlm.nih.gov/pubmed/19451168)]
+*Li H. and Durbin R., 2009, Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics, 25:1754-1760.* [PMID: [19451168](http://www.ncbi.nlm.nih.gov/pubmed/19451168)]
 * **samtools**</br>
 Used for fetching mapped reads and sorting them by locus</br>
-*Li H., Handsaker B. et al, 2009, The Sequence alignment/map (SAM) format and SAMtools, Bioinformatics, 25(16):2078-9.* [PMID:[19505943](http://www.ncbi.nlm.nih.gov/pubmed/19505943)]
+*Li H., Handsaker B. et al., 2009, The Sequence alignment/map (SAM) format and SAMtools, Bioinformatics, 25(16):2078-9.* [PMID:[19505943](http://www.ncbi.nlm.nih.gov/pubmed/19505943)]
 * **bedtools**</br>
 Used for getting bed files</br>
 *Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2.* [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
+* **bedtools**</br>
+Used for getting bed files</br>
+*Ramírez, Fidel, Devon P. Ryan, et al., 2016, deepTools2: A next Generation Web Server for Deep-Sequencing Data Analysis, Nucleic Acids Research.* [PMID:[27079975](https://pubmed.ncbi.nlm.nih.gov/27079975)]
+* **blast**</br>
+Used for finding AMR gene on the genome</br>
+*Camacho C., Coulouris G., et al., 2008, BLAST+: architecture and applications, BMC Bioinformatics, 0:42. * [PMID:[20003500](https://pubmed.ncbi.nlm.nih.gov/20003500)]
+
 # Test environment
 Ubuntu 16.04 LTS with perl v5.26.2 (Theoretically compatible with other generic Linux version but not tested)
 # Bundled binaries
