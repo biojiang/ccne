@@ -350,12 +350,17 @@ Used for fetching mapped reads and sorting them by locus</br>
 * **bedtools**</br>
 Used for getting bed files</br>
 *Quinlan R A. and Hall M I., 2010, BEDTools: a flexible suite of utilities for comparing genomic features, Bioinformatics, 26(6):841-2.* [PMID:[20110278](https://pubmed.ncbi.nlm.nih.gov/20110278)]
-* **deepTools**</br>
+* **deepTools**&</br>
 Used for getting bed files</br>
+[Installation](https://deeptools.readthedocs.io/en/develop/content/installation.html)</br>
 *Ramírez, Fidel, Devon P. Ryan, et al., 2016, deepTools2: A next Generation Web Server for Deep-Sequencing Data Analysis, Nucleic Acids Research.* [PMID:[27079975](https://pubmed.ncbi.nlm.nih.gov/27079975)]
-* **blast**</br>
+* **blast**&</br>
 Used for finding AMR gene on the genome</br>
 *Camacho C., Coulouris G., et al., 2008, BLAST+: architecture and applications, BMC Bioinformatics, 0:42.* [PMID:[20003500](https://pubmed.ncbi.nlm.nih.gov/20003500)]
+* **perl Math::CDF**&</br>
+Used for estimating AMR CN</br>
+[Math::CDF](https://metacpan.org/pod/Math::CDF)
+<p>& Only required for ccne-acc, the others are required for both ccne-fast and ccne-acc.</p>
 
 # Test environment
 Ubuntu 16.04 LTS with perl v5.26.2 (Theoretically compatible with other generic Linux version but not tested)
