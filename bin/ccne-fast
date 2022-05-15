@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 #    ccne - Carbapenemase-encoding gene copy number estimator
 #
