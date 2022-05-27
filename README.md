@@ -154,9 +154,13 @@ $ cp ./templete/templete.list File.list
 $ head File.list
 SRR14561347	./SRR14561347_1.fastq.gz	./SRR14561347_2.fastq.gz
 ```
-4. Run ccne.
+4. Run ccne-fast or ccne-acc.
 ```
-$ ccne --amr KPC-2 --sp Kpn --in File.list --out result.txt
+$ ccne-fast --amr KPC-2 --sp Kpn --in File.list --out result.txt
+```
+or
+```
+$ ccne-acc --amr KPC-2 --sp Kpn --in File.list --out result.txt
 ```
 5. Check the result.
 ```
