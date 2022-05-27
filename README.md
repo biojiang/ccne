@@ -36,7 +36,7 @@ SRR14561347     570     2127    3.73157894736842
 ## Bioconda [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/ccne/README.html)
 If you use Conda you can use the Bioconda channel:
 ```
-conda install ccne
+conda install -c conda-forge -c bioconda -c defaults ccne
 ```
 ## Source
 Install the latest version direct from Github. 
