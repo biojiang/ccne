@@ -33,6 +33,11 @@ ID      Average reference reads depth   KPC-2 reads depth       Estimated KPC-2 
 SRR14561347     570     2127    3.73157894736842
 ```
 # Installation
+## Bioconda [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/ccne/README.html)
+If you use Conda you can use the Bioconda channel:
+```
+conda install ccne
+```
 ## Source
 Install the latest version direct from Github. 
 ```
