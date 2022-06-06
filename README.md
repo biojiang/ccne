@@ -38,6 +38,10 @@ If you use Conda you can use the Bioconda channel:
 ```
 conda install -c conda-forge -c bioconda -c defaults ccne
 ```
+Too slow? Try [mamba](https://github.com/mamba-org/mamba)
+```
+mamba install ccne
+```
 ## Source
 Install the latest version direct from Github. 
 ```
