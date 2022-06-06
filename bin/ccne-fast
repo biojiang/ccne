@@ -63,25 +63,25 @@ my %tools = (
     NEEDED  => 1,
   },
   'hts_SuperDeduper' => {
-    GETVER  => "hts_SuperDeduper 2>&1| grep -E 'Version: .+\$'",
+    GETVER  => "hts_SuperDeduper -v 2>&1| grep -E '.+\$'",
     REGEXP  => qr/($BIDEC)/,
     MINVER  => "1.3",
     NEEDED  => 1,
   },
   'hts_AdapterTrimmer' => {
-    GETVER  => "hts_AdapterTrimmer 2>&1| grep -E 'Version: .+\$'",
+    GETVER  => "hts_AdapterTrimmer -v 2>&1| grep -E '.+\$'",
     REGEXP  => qr/($BIDEC)/,
     MINVER  => "1.3",
     NEEDED  => 1,
   },
   'hts_SeqScreener' => {
-    GETVER  => "hts_SeqScreener 2>&1| grep -E 'Version: .+\$'",
+    GETVER  => "hts_SeqScreener -v 2>&1| grep -E '.+\$'",
     REGEXP  => qr/($BIDEC)/,
     MINVER  => "1.3",
     NEEDED  => 1,
   },
   'hts_PolyATTrim' => {
-    GETVER  => "hts_PolyATTrim 2>&1| grep -E 'Version: .+\$'",
+    GETVER  => "hts_PolyATTrim -v 2>&1| grep -E '.+\$'",
     REGEXP  => qr/($BIDEC)/,
     MINVER  => "1.3",
     NEEDED  => 1,
@@ -299,7 +299,14 @@ sub stat()
                 push @stat,$ele[-1];
         }
         map{$sum+=$_;$i++;}@stat[$fl..$#stat-$fl];
-        return $sum/$i;
+	if($i == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return $sum/$i;
+	}
 	#return $stat[int(($#stat-$fl-$fl+1)/2)];
 }
 #-------------------------------------------------
@@ -319,7 +326,14 @@ sub sd()
                 push @stat,$ele[-1];
         }
         map{$sum+=($_-$mean)**2;$i++;}@stat[$fl..$#stat-$fl];
-        return sqrt($sum/$i);
+	if($i == 0)
+        {
+                return 0;
+        }
+	else
+	{
+        	return sqrt($sum/$i);
+	}
 }
 #------------------------------------------------
 sub find_exe {
