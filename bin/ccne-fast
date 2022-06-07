@@ -262,7 +262,15 @@ while(my $line = <IN>)
 		$i++;
 	}
 	$hk_cn = $total_hk/(scalar @cmd_hk);
-	my $ratio = $carb_cn/$hk_cn;
+	my $ratio = 0;
+	if($hk_cn == 0)
+	{
+		$ratio = 'NA';
+	}
+	else
+	{
+		$ratio = $carb_cn/$hk_cn;
+	}
 	my $flag = 0;
 	if($multiref == 0)
 	{
