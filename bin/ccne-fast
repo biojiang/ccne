@@ -288,6 +288,7 @@ while(my $line = <IN>)
 	{
 		system("rm $reads1");
 	}
+	system("rm stats.log");
 	&msg("$name finished!");
 }
 &msg("All finished! Enjoy!");
