@@ -164,7 +164,7 @@ $ ccne-fast --amr KPC-2 --sp Kpn --in File.list --out result.txt
 ```
 or
 ```
-$ ccne-acc --amr KPC-2 --sp Kpn --in File.list --out result.txt
+$ ccne-acc --amr KPC-2 --in File.list --out result.txt
 ```
 5. Check the result.
 ```
@@ -402,6 +402,14 @@ Pmi|***Proteus mirabilis***|*rpoB*
 
    The SD of reads depth is the standard deviation of reads depth of a gene. If this value is large, then the reads depth will be unreliable. In our practical analysis, the SD of reads depth is usually less than 15% of the mean.
    
+3. "error while loading shared libraries: libncurses.so.5"
+ 
+    sudo apt install libncurses5
+    
+4. "blastn: error while loading shared libraries: libidn.so.11"
+
+    sudo apt install libidn11-dev
+
 
 # Dependencies
 ## ccne-fast & ccne-acc
@@ -420,7 +428,15 @@ Used for getting bed files</br>
 * **deepTools**&</br>
 Used for getting bed files</br>
 [Installation](https://deeptools.readthedocs.io/en/develop/content/installation.html)</br>
-*Ramírez, Fidel, Devon P. Ryan, et al., 2016, deepTools2: A next Generation Web Server for Deep-Sequencing Data Analysis, Nucleic Acids Research.* [PMID:[27079975](https://pubmed.ncbi.nlm.nih.gov/27079975)]
+*Ramírez, Fidel, Devon P. Ryan, et al., 2016, deepTools2: A next Generation Web Server for Deep-Sequencing Data Analysis, Nucleic Acids Research.* [PMID:[27079975](https://pubmed.ncbi.nlm.nih.gov/27079975)] </br>
+ Requirements for deepTools:
+   - Python 2.7 or Python 3.x
+   - numpy >= 1.8.0
+   - scipy >= 0.17.0
+   - py2bit >= 0.1.0
+   - pyBigWig >= 0.2.1
+   - pysam >= 0.8
+   - matplotlib >= 1.4.0
 * **blast**&</br>
 Used for finding AMR gene on the genome</br>
 *Camacho C., Coulouris G., et al., 2008, BLAST+: architecture and applications, BMC Bioinformatics, 0:42.* [PMID:[20003500](https://pubmed.ncbi.nlm.nih.gov/20003500)]
