@@ -308,13 +308,16 @@ while(my $line = <IN>)
 		&err("Input file format error!");
 	}
 	my ($amr_depth,$ctg_depth) = &calDepth("$tmp_dir/$corrected_bed","$tmp_dir/$amr_bed");
+	$amr_depth = sprintf "%.2f",$amr_depth;
+	$ctg_depth = sprintf "%.2f",$ctg_depth;
+	my $outdepth = sprintf "%.2f",$amr_depth/$ctg_depth;
 	if($amr_status == 1)
 	{
-		print RES '*',$name,"\t",$ctg_depth,"\t",$amr_depth,"\t",$amr_depth/$ctg_depth,"\n";
+		print RES '*',$name,"\t",$ctg_depth,"\t",$amr_depth,"\t",$outdepth,"\n";
 	}
 	else
 	{
-		print RES $name,"\t",$ctg_depth,"\t",$amr_depth,"\t",$amr_depth/$ctg_depth,"\n";
+		print RES $name,"\t",$ctg_depth,"\t",$amr_depth,"\t",$outdepth,"\n";
 	}
 	&msg("Remove tmp files");
 	if($reads2 ne '')
@@ -575,18 +578,19 @@ sub getAMRBed()
         print OUT "$items[0]\t$items[1]\t",join("\t",sort{$a<=>$b}@items[8..9]),"\n";
 	close OUT;
 	open SEQ,"<$amr";
-	local $/ = <SEQ>;
+	local $/ = ">";
 	<SEQ>;
 	my $amr_len = 0;
 	while(my $line = <SEQ>)
 	{
 		chomp $line;
-		my @seq = split/\n/.$line,2;
+		my @seq = split/\n/,$line,2;
 		$seq[1] =~ s/>//g;
 		$seq[1] =~ s/\r|\s//g;
 		$amr_len = length $seq[1];
 	}
 	close SEQ;
+	local $/ = "\n";
 	if($items[4] != 0 or $items[5] != 0 or ($items[7]-$items[6]+1) != $amr_len)
 	{
 		return 1;

@@ -245,10 +245,10 @@ while(my $line = <IN>)
 		$total_carb += &stat($content_carb,$fl);
 		if($multiref == 0)
 		{
-			$carb_sd = &sd($content_carb,$fl,$total_carb);
+			$carb_sd = sprintf "%.2f",&sd($content_carb,$fl,$total_carb);
 		}
 	}
-	$carb_cn = $total_carb/(scalar @cmd_carb);
+	$carb_cn = sprintf "%.2f",$total_carb/(scalar @cmd_carb);
 	my $i = 0;
 	for my $cmd(@cmd_hk)
 	{
@@ -257,11 +257,11 @@ while(my $line = <IN>)
 		$total_hk += &stat($content_hk,$fl);
 		if($multiref == 0)
 		{
-			$hk_sd = &sd($content_hk,$fl,$total_hk);
+			$hk_sd = sprintf "%.2f",&sd($content_hk,$fl,$total_hk);
 		}
 		$i++;
 	}
-	$hk_cn = $total_hk/(scalar @cmd_hk);
+	$hk_cn = sprintf "%.2f",$total_hk/(scalar @cmd_hk);
 	my $ratio = 0;
 	if($hk_cn == 0)
 	{
@@ -269,7 +269,7 @@ while(my $line = <IN>)
 	}
 	else
 	{
-		$ratio = $carb_cn/$hk_cn;
+		$ratio = sprintf "%.2f",$carb_cn/$hk_cn;
 	}
 	my $flag = 0;
 	if($multiref == 0)
