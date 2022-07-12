@@ -32,7 +32,7 @@ use Math::CDF qw(:all);
 my $OPSYS = $^O;
 my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
 my $EXE = $FindBin::RealScript;
-my $VERSION = "1.1.0";
+my $VERSION = "1.1.1";
 my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
 my (@Options,@LOG,$quiet,$multiref,$dbdir,$AMR_Gene,$confdir,%info_amr,$input,$output,$threads);
 $dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
