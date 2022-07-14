@@ -36,7 +36,12 @@ SRR14561347     570     2127    3.73157894736842
 ## Bioconda [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/ccne/README.html) [![Anaconda-Server Badge](https://anaconda.org/bioconda/ccne/badges/downloads.svg)](https://anaconda.org/bioconda/ccne)
 If you use Conda you can use the Bioconda channel:
 ```
-conda install -c conda-forge -c bioconda -c defaults ccne
+#Add channels for bioconda
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+#Install ccne
+conda install ccne
 ```
 Too slow? Try [mamba](https://github.com/mamba-org/mamba)
 ```
@@ -409,8 +414,19 @@ Pmi|***Proteus mirabilis***|*rpoB*
 4. "blastn: error while loading shared libraries: libidn.so.11"
 
     sudo apt install libidn11-dev
+5. "UnsatisfiableError"
+```
+  UnsatisfiableError: The following specifications were found to be incompatible with each other:
 
+Output in format: Requested package -> Available versionsThe following specifications were found to be incompatible with your system:
 
+  - feature:/linux-64::__glibc==2.23=0
+  - feature:|@/linux-64::__glibc==2.23=0
+
+Your installed version is: 2.23"
+
+```
+Install [htstream](https://s4hts.github.io/HTStream/) first.
 # Dependencies
 ## ccne-fast & ccne-acc
 * **HTStream**</br>
