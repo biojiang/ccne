@@ -32,7 +32,7 @@ use Math::CDF qw(:all);
 my $OPSYS = $^O;
 my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
 my $EXE = $FindBin::RealScript;
-my $VERSION = "1.1.1";
+my $VERSION = "1.1.2";
 my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
 my (@Options,@LOG,$quiet,$multiref,$dbdir,$AMR_Gene,$confdir,%info_amr,$input,$output,$threads);
 $dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
@@ -228,7 +228,7 @@ while(my $line = <IN>)
 			my $prefix = &readQC("$tmp_dir/$name",$reads1);
 			$reads1 = $prefix.'_SE.fastq.gz';
 			&msg("Reads mapping");
-			system("bwa mem $tmp_dir/$combine_ctg $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - |samtools sort --threads $othreads - > $tmp_dir/$raw_bam");
+			system("bwa mem -t $threads $tmp_dir/$combine_ctg $reads1 |samtools view -b -F 4 --threads $othreads - |samtools sort --threads $othreads - > $tmp_dir/$raw_bam");
 			system("samtools index $tmp_dir/$raw_bam");
 			&msg("GC bias correction");
 			system("computeGCBias -b $tmp_dir/$raw_bam --effectiveGenomeSize $eff_len -g $tmp_dir/$bit_file --GCbiasFrequenciesFile $tmp_dir/$gc_freq -bl $tmp_dir/$exclued_bed -p $threads --fragmentLength 150");
@@ -270,7 +270,7 @@ while(my $line = <IN>)
 			$reads1 = $prefix.'_R1.fastq.gz';
 			$reads2 = $prefix.'_R2.fastq.gz';
 			&msg("Reads mapping");
-                        system("bwa mem $tmp_dir/$combine_ctg $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - |samtools sort --threads $othreads - > $tmp_dir/$raw_bam");
+                        system("bwa mem -t $threads $tmp_dir/$combine_ctg $reads1 $reads2 |samtools view -b -F 4 --threads $othreads - |samtools sort --threads $othreads - > $tmp_dir/$raw_bam");
                         system("samtools index $tmp_dir/$raw_bam");
 			&msg("GC bias correction");
                         system("computeGCBias -b $tmp_dir/$raw_bam --effectiveGenomeSize $eff_len -g $tmp_dir/$bit_file --GCbiasFrequenciesFile $tmp_dir/$gc_freq -bl $tmp_dir/$exclued_bed -p $threads");

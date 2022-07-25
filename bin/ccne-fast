@@ -32,7 +32,7 @@ use Cwd qw(abs_path);
 my $OPSYS = $^O;
 my $BINDIR = "$FindBin::RealBin/../binaries/$OPSYS";
 my $EXE = $FindBin::RealScript;
-my $VERSION = "1.1.1";
+my $VERSION = "1.1.2";
 my $AUTHOR = 'Jianping Jiang <jiangjianping@fudan.edu.cn>';
 my (@Options,@LOG,$quiet,$multiref,$dbdir,$AMR_Gene, $confdir,%info_sp,%info_amr,$SP, $Housekeeping_gene,$input,$output,$threads,$fl);
 $dbdir = $ENV{'CCNE_DBDIR'} || abs_path("$FindBin::RealBin/../db");
@@ -196,10 +196,10 @@ while(my $line = <IN>)
 		{
 			my $prefix = &readQC($name,$reads1);
 			$reads1 = $prefix.'_SE.fastq.gz';
-			push @cmd_carb, "bwa mem $AMR_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - |bedtools genomecov -ibam - -dz";
+			push @cmd_carb, "bwa mem -t $threads $AMR_index $reads1 |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - |bedtools genomecov -ibam - -dz";
 			for my $Housekeeping_index(@Housekeeping_index_set)
 			{
-				push @cmd_hk, "bwa mem $Housekeeping_index $reads1 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
+				push @cmd_hk, "bwa mem -t $threads $Housekeeping_index $reads1 |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
 			}
 		}
 		else
@@ -217,10 +217,10 @@ while(my $line = <IN>)
 			$reads1 = $prefix.'_R1.fastq.gz';
 			$reads2 = $prefix.'_R2.fastq.gz';
 			
-			push @cmd_carb, "bwa mem $AMR_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
+			push @cmd_carb, "bwa mem -t $threads $AMR_index $reads1 $reads2 |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
 			for my $Housekeeping_index(@Housekeeping_index_set)
 			{
-			 	push @cmd_hk,"bwa mem $Housekeeping_index $reads1 $reads2 -t $threads |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
+			 	push @cmd_hk,"bwa mem -t $threads $Housekeeping_index $reads1 $reads2 |samtools view -b -F 4 --threads $othreads - | samtools sort --threads $othreads - | bedtools genomecov -ibam - -dz";
 			}
 		}
 		else
