@@ -1,6 +1,8 @@
 # ccne: Carbapenemase-encoding gene Copy Number Estimator
 # Introduction
 **C**arbapenemase-encoding gene **C**opy **N**umber **E**stimator (ccne) is a tool to estimate the copy number of AMR genes. It uses housekeeping gene as the reference and compares the count of reads that mapped to AMR genes with the count of reads that mapped to the reference gene. 
+# Citation
+Jiang J, Chen L,Chen X, Li P, Xu X, Fowler VG, van Duin D, Wang M.2022.Carbapenemase-Encoding Gene Copy Number Estimator (CCNE): a Tool for Carbapenemase Gene Copy Number Estimation. Microbiol Spectr10:e01000-22. https://doi.org/10.1128/spectrum.01000-22
 # Quick start
 ## ccne-fast
 ```
